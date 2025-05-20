@@ -1,2 +1,2 @@
 # ftjchatbot
-FTJ Chatbot (beta)
+This is a beta version of the project ai from ai
