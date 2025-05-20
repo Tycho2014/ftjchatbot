@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FTJ Chatbot (beta)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #007BFF; /* Blauwe achtergrond */
+        }
+        .container {
+            text-align: center;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px; /* Verhoogde breedte */
+            margin: 20px;
+        }
+        input, button {
+            padding: 10px;
+            margin-top: 10px;
+            width: 100%;
+        }
+        .learn-container {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .history {
+            text-align: left;
+            margin-top: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .history div {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Vraag de Chatbot</h1>
+        <input type="text" id="userInput" placeholder="Stel een vraag...">
+        <button onclick="askBot()">Vraag</button>
+        <p id="response"></p>
+
+        <div class="learn-container">
+            <h2>Leren</h2>
+            <input type="text" id="learnQuestion" placeholder="Als gebruiker vraagt...">
+            <input type="text" id="learnAnswer" placeholder="Dan geeft AI antwoord...">
+            <button onclick="learn()">Leer de AI</button>
+        </div>
+
+        <div class="history" id="history">
+            <h3>Gesprekgeschiedenis</h3>
+        </div>
+    </div>
+
+    <script>
+        let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
+        const historyElement = document.getElementById('history');
+
+        function askBot() {
+            const input = document.getElementById('userInput').value.toLowerCase();
+            let response = "Sorry, dat weet ik niet.";
+
+            if (memory[input]) {
+                response = memory[input];
+            } else {
+                if (input.includes("hallo")) {
+                    response = "Hallo! Hoe kan ik je helpen?";
+                } else if (input.includes("hoe gaat het")) {
+                    response = "Met mij gaat het goed, dank je!";
+                } else if (input.includes("wat is je naam")) {
+                    response = "Ik ben een eenvoudige chatbot.";
+                }
+            }
+
+            document.getElementById('response').innerText = response;
+            updateHistory(input, response);
+        }
+
+        function learn() {
+            const question = document.getElementById('learnQuestion').value.toLowerCase().trim();
+            const answer = document.getElementById('learnAnswer').value.trim();
+
+            if (question && answer) {
+                memory[question] = answer;
+                localStorage.setItem('chatbotMemory', JSON.stringify(memory));
+                alert(`Ik heb geleerd dat als je '${question}' zegt, ik '${answer}' moet antwoorden.`);
+            } else {
+                alert("Vul zowel een vraag als een antwoord in.");
+            }
+        }
+
+        function updateHistory(question, answer) {
+            const entry = document.createElement('div');
+            entry.innerHTML = `<strong>Jij:</strong> ${question}<br><br><strong>AI:</strong> ${answer}`;
+            historyElement.appendChild(entry);
+        }
+    </script>
+</body>
+</html>
