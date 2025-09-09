@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
     <meta charset="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FTJ Chatbot beta</title>
+    <title>FTJ Chatbot (super slim, beta)</title>
     <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
     <style>
         body {
@@ -25,11 +25,10 @@
             width: 400px;
             margin: 20px;
         }
-        input, button, select {
+        input, button {
             padding: 10px;
             margin-top: 10px;
             width: 100%;
-            box-sizing: border-box;
         }
         .learn-container {
             margin-top: 20px;
@@ -56,32 +55,30 @@
             border-radius: 7px;
             padding: 10px;
         }
-        .calc-options {
-            margin-top: 10px;
-            text-align: left;
-            font-size: 0.9em;
-        }
-        .small {
-            font-size: 0.85em;
-            color: #333;
-        }
     </style>
-    <!-- math.js gebruikt voor veilige en uitgebreide berekeningen lokaal -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.8.0/math.min.js" integrity="sha512-Xxj2k9YJgQ6zqQhP8tG58sKk2eX1yG4Gk2mF32lKxOD4Q2wqz2v3Wwzq1s9n0Vx1Gv8k6kL3nZ2W9l0ZQxJ8g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
+    <button onclick="wisGeheugen()">Wis Geheugen</button>
+<script>
+function wisGeheugen() {
+  // Wissen van lokale opslag (localStorage en sessionStorage)
+  localStorage.clear();
+  sessionStorage.clear();
+
+  // Wissen van gespreksgeschiedenis (voorbeeld)
+  if (typeof window.conversationHistory !== "undefined") {
+    window.conversationHistory = [];
+  }
+
+  // Eventueel: UI updaten
+  alert("Geheugen is gewist!");
+}
+</script>
     <div class="container">
         <h1>Vraag de Chatbot</h1>
-        <input type="text" id="userInput" placeholder="Stel een vraag... of typ een berekening (bijv. 2*(3+4)/7)">
+        <input type="text" id="userInput" placeholder="Stel een vraag...">
         <button onclick="askBot()">Vraag</button>
         <p id="response"></p>
-
-        <div class="calc-options">
-            <label><input type="checkbox" id="useOnline" /> Probeer resultaat van onlinerekenmachine.com (experimenteel, kan CORS vereisen)</label>
-            <input type="text" id="corsProxy" placeholder="Optionele CORS-proxy (bijv. https://your-cors-proxy.com/ )">
-            <p class="small">Aanbevolen: laat dit uit voor betrouwbare lokale berekeningen. Gebruik alleen een proxy die je vertrouwt als je onlinerekenmachine.com wilt proberen.</p>
-        </div>
-
         <div class="learn-container">
             <h2>Leren</h2>
             <input type="text" id="learnQuestion" placeholder="Als gebruiker vraagt...">
@@ -105,90 +102,10 @@
         let websiteKnowledge = JSON.parse(localStorage.getItem('chatbotWebsiteKnowledge')) || {};
         const historyElement = document.getElementById('history');
 
-        // Helper: detecteer of input een rekenkundige expressie is (basis + functies)
-        function isMathExpression(input) {
-            // Toegestane tekens: cijfers, operators, punt, komma, spaties, haakjes en letters (voor functienamen)
-            // Verwerp zinnen met woorden als 'wie', 'wat', 'waar', etc. (eenvoudig filter)
-            const banWords = ['wie','wat','waar','wanneer','waarom','hoe','naam','dag','uur'];
-            for (let w of banWords) {
-                if (input.includes(' ' + w + ' ') || input.startsWith(w + ' ') || input.endsWith(' ' + w)) return false;
-            }
-            // Als het voorkomt als: alleen contain math-tekens of begint met '='
-            const mathLike = /^[0-9+\-*/^%().,eE\sa-zA-Z_]+$/;
-            return mathLike.test(input) && /[0-9]/.test(input);
-        }
-
-        // Lokale evaluatie met math.js
-        function evaluateExpression(expr) {
-            try {
-                // Vervang komma door punt voor decimalen (NL -> JS)
-                const cleaned = expr.replace(/,/g, '.');
-                const result = math.evaluate(cleaned);
-                // Format netjes (vervang punt terug door komma als gewenst)
-                return String(result);
-            } catch (e) {
-                return null;
-            }
-        }
-
-        // Experimentele poging: haal resultaat van onlinerekenmachine.com (voornamelijk ter demonstratie)
-        // Let op: op veel browsers zal fetch naar onlinerekenmachine.com door CORS geblokkeerd worden.
-        // Je kunt een vertrouwde CORS-proxy opgeven in het invoerveld.
-        async function tryOnlineRekenmachine(expr, proxy) {
-            try {
-                const url = `https://onlinerekenmachine.com/?q=${encodeURIComponent(expr)}`;
-                const fetchUrl = proxy ? (proxy.replace(/\/$/, '') + '/' + url) : url;
-                const res = await fetch(fetchUrl);
-                if (!res.ok) return null;
-                const text = await res.text();
-                // Zeer eenvoudige parsing: zoek naar een element dat mogelijk resultaat bevat.
-                // Dit is heuristisch en kan breken als de site anders is opgebouwd.
-                // Eerst: zoek naar iets als "display" of "result" in de HTML
-                let m = text.match(/id=["']?display["']?[^>]*>([^<]+)/i)
-                    || text.match(/class=["']?result["']?[^>]*>([^<]+)/i)
-                    || text.match(/Result[:\s]*<\/?\w*[^>]*>([0-9eE+.\-(), ]{1,100})/i)
-                    || text.match(/([0-9]+[\d\.\,\s\+\-\*\/\^%()eE]{0,100})/);
-                if (m && m[1]) {
-                    return m[1].trim();
-                }
-                // fallback: probeer body text zoeken naar het laatste getal
-                const nums = text.match(/-?\d+[\d\.\,eE\-]*/g);
-                if (nums && nums.length) return nums[nums.length-1];
-                return null;
-            } catch (e) {
-                return null;
-            }
-        }
-
         // Chatbot engine: slim, contextueel en flexibel
-        async function askBot() {
-            const inputRaw = document.getElementById('userInput').value.trim();
-            const input = inputRaw.toLowerCase();
+        function askBot() {
+            const input = document.getElementById('userInput').value.toLowerCase().trim();
             let response = "Sorry, dat weet ik (nog) niet.";
-
-            // Eerst: als het eruit ziet als een wiskundige expressie, reken lokaal (betrouwbaar)
-            if (isMathExpression(input)) {
-                const useOnline = document.getElementById('useOnline').checked;
-                const proxy = document.getElementById('corsProxy').value.trim();
-                // Probeer online only als gebruiker expliciet aangeeft dat hij/zij dat wil.
-                let onlineResult = null;
-                if (useOnline) {
-                    onlineResult = await tryOnlineRekenmachine(inputRaw, proxy || null);
-                }
-                // Lokale berekening altijd beschikbaar (math.js)
-                const localResult = evaluateExpression(inputRaw);
-                if (onlineResult) {
-                    response = `Online resultaat (onlinerekenmachine.com): ${onlineResult}  (lokale berekening: ${localResult ?? 'fout'})`;
-                } else if (localResult !== null) {
-                    response = `Resultaat: ${localResult}`;
-                } else {
-                    response = "Kon de berekening niet uitvoeren.";
-                }
-
-                document.getElementById('response').innerText = response;
-                updateHistory(inputRaw, response);
-                return;
-            }
 
             // Contextuele logica
             if (memory[input]) {
@@ -214,7 +131,7 @@
             }
 
             document.getElementById('response').innerText = response;
-            updateHistory(inputRaw, response);
+            updateHistory(input, response);
         }
 
         // Slim zoeken naar vergelijkbare vragen
@@ -274,17 +191,14 @@
         // Bonus: leert van jouw reactie op het antwoord van de AI
         function updateHistory(question, answer) {
             const entry = document.createElement('div');
-            const safeQuestion = escapeHtml(question);
-            const safeAnswer = escapeHtml(answer);
-            entry.innerHTML = `<strong>Jij:</strong> ${safeQuestion}<br><br><strong>AI:</strong> ${safeAnswer}<br>
-                <input type="text" placeholder="Hoe reageer je op dit AI-antwoord?" onblur="saveReaction('${encodeURIComponent(safeAnswer)}', this.value)">
+            entry.innerHTML = `<strong>Jij:</strong> ${question}<br><br><strong>AI:</strong> ${answer}<br>
+                <input type="text" placeholder="Hoe reageer je op dit AI-antwoord?" onblur="saveReaction('${answer}', this.value)">
             `;
             historyElement.appendChild(entry);
         }
 
         // Slaat reactie van gebruiker op AI-antwoord op
-        window.saveReaction = function(aiAnswerEncoded, userReaction) {
-            const aiAnswer = decodeURIComponent(aiAnswerEncoded || '');
+        window.saveReaction = function(aiAnswer, userReaction) {
             if (aiAnswer && userReaction) {
                 reactionMemory[aiAnswer] = userReaction;
                 localStorage.setItem('chatbotReactionMemory', JSON.stringify(reactionMemory));
@@ -296,22 +210,12 @@
             const divs = historyElement.querySelectorAll('div');
             if (divs.length > 0) {
                 const lastDiv = divs[divs.length - 1];
-                const aiMatch = lastDiv.innerHTML.match(/<strong>AI:<\/strong> ([^<]+)/);
+                const aiMatch = lastDiv.innerHTML.match(/<strong>AI:<\/strong> (.+?)(<br|$)/);
                 if (aiMatch && aiMatch[1]) {
                     return aiMatch[1].trim();
                 }
             }
             return null;
-        }
-
-        // eenvoudige HTML-escape
-        function escapeHtml(text) {
-            return text
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
         }
     </script>
 </body>
