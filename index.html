@@ -58,6 +58,22 @@
     </style>
 </head>
 <body>
+    <button onclick="wisGeheugen()">Wis Geheugen</button>
+<script>
+function wisGeheugen() {
+  // Wissen van lokale opslag (localStorage en sessionStorage)
+  localStorage.clear();
+  sessionStorage.clear();
+
+  // Wissen van gespreksgeschiedenis (voorbeeld)
+  if (typeof window.conversationHistory !== "undefined") {
+    window.conversationHistory = [];
+  }
+
+  // Eventueel: UI updaten
+  alert("Geheugen is gewist!");
+}
+</script>
     <div class="container">
         <h1>Vraag de Chatbot</h1>
         <input type="text" id="userInput" placeholder="Stel een vraag...">
