@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
     <meta charset="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FTJ Chatbot (beta)</title>
+    <title>FTJ Chatbot (super slim, beta)</title>
     <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
     <style>
         body {
@@ -47,7 +47,7 @@
         .history div {
             margin-bottom: 10px;
         }
-        .knowledge-container {
+        .website-container {
             margin-top: 20px;
             text-align: left;
             font-size: 0.95em;
@@ -69,81 +69,37 @@
             <input type="text" id="learnAnswer" placeholder="Dan geeft AI antwoord...">
             <button onclick="learn()">Leer de AI</button>
         </div>
-        <div class="knowledge-container" id="knowledgeContainer">
-            <h3>Vooraf ingestelde kennis</h3>
-            <ul id="knowledgeList"></ul>
+        <div class="website-container">
+            <h3>Leer van een website</h3>
+            <input type="text" id="websiteInput" placeholder="Voer een URL in (met open CORS)">
+            <button onclick="learnFromWebsite()">Leer van website</button>
+            <p id="websiteStatus"></p>
         </div>
         <div class="history" id="history">
             <h3>Gesprekgeschiedenis</h3>
         </div>
     </div>
     <script>
-        // Heel veel voorkennis, uitgebreid en divers
-        const defaultKnowledge = {
-            "wat is de hoofdstad van nederland": "De hoofdstad van Nederland is Amsterdam.",
-            "wie is de koning van nederland": "De koning van Nederland is Willem-Alexander.",
-            "wat is de grootste planeet": "De grootste planeet in ons zonnestelsel is Jupiter.",
-            "wie heeft de relativiteitstheorie bedacht": "Albert Einstein heeft de relativiteitstheorie bedacht.",
-            "wat is het hoogste gebouw ter wereld": "Het hoogste gebouw ter wereld is de Burj Khalifa in Dubai.",
-            "wat is 2 + 2": "2 + 2 is 4.",
-            "noem drie nederlandse provincies": "Drie Nederlandse provincies zijn: Noord-Holland, Zuid-Holland, en Utrecht.",
-            "wie is de president van de vs": "De president van de Verenigde Staten verandert; in 2024 is dat Joe Biden.",
-            "wat is het snelste landdier": "Het snelste landdier is de cheetah.",
-            "hoe werkt fotosynthese": "Fotosynthese is het proces waarbij planten zonlicht, water en koolstofdioxide omzetten in zuurstof en glucose.",
-            "wat is javascript": "JavaScript is een programmeertaal die veel gebruikt wordt voor webontwikkeling.",
-            "wat betekent 'bonjour'": "'Bonjour' betekent 'goedendag' in het Frans.",
-            "hoe zeg je hallo in spaans": "'Hola' is hallo in het Spaans.",
-            "wat is de afstand tussen aarde en maan": "Gemiddeld is de afstand tussen de aarde en de maan ongeveer 384.400 kilometer.",
-            "wie schreef harry potter": "J.K. Rowling schreef Harry Potter.",
-            "wat is het kleinste land ter wereld": "Het kleinste land ter wereld is Vaticaanstad.",
-            "wat is de waarde van pi": "Pi is ongeveer 3,14159.",
-            "wat is de kleur van de zon": "De zon lijkt geel, maar is eigenlijk wit als je het buiten de atmosfeer bekijkt.",
-            "wat is een chatbot": "Een chatbot is een computerprogramma dat gesprekken voert met mensen.",
-            "wie is rembrandt": "Rembrandt van Rijn was een beroemde Nederlandse schilder uit de 17e eeuw.",
-            "hoe werkt wifi": "Wifi gebruikt radiogolven om draadloos data te versturen tussen apparaten en een router.",
-            "wat is de hoofdstad van frankrijk": "De hoofdstad van Frankrijk is Parijs.",
-            "wie was napoleon": "Napoleon Bonaparte was een Franse militaire leider en keizer.",
-            "wat is het langste dier": "De blauwe vinvis is het langste dier ter wereld.",
-            "wat is het koudste continent": "Antarctica is het koudste continent.",
-            "wat is een zwart gat": "Een zwart gat is een gebied in de ruimte waar de zwaartekracht zo sterk is dat niets kan ontsnappen.",
-            "wat is de grootste oceaan": "De grootste oceaan is de Stille Oceaan.",
-            "wie ontdekte penicilline": "Alexander Fleming ontdekte penicilline.",
-            "wat is het symbool voor water": "Het scheikundig symbool voor water is H₂O.",
-            // Je kunt hier eenvoudig honderden of duizenden kennisvragen toevoegen!
-        };
-
-        // Extra geheugen: leert niet alleen op vraag maar ook op reactie
+        // Slim geheugen: leert alles wat je invoert en onthoudt context
         let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
         let reactionMemory = JSON.parse(localStorage.getItem('chatbotReactionMemory')) || {};
+        let websiteKnowledge = JSON.parse(localStorage.getItem('chatbotWebsiteKnowledge')) || {};
         const historyElement = document.getElementById('history');
-        const knowledgeList = document.getElementById('knowledgeList');
 
-        // Toon alle voorkennis in het scherm
-        function showKnowledge() {
-            knowledgeList.innerHTML = '';
-            Object.keys(defaultKnowledge).forEach(q => {
-                const li = document.createElement('li');
-                li.textContent = `Vraag: "${q}" → Antwoord: "${defaultKnowledge[q]}"`;
-                knowledgeList.appendChild(li);
-            });
-        }
-        showKnowledge();
-
-        // Chatbot: zoekt in memory, default kennis, en leert van reacties
+        // Chatbot engine: slim, contextueel en flexibel
         function askBot() {
             const input = document.getElementById('userInput').value.toLowerCase().trim();
-            let response = "Sorry, dat weet ik niet.";
+            let response = "Sorry, dat weet ik (nog) niet.";
 
-            // Kijk eerst in custom geheugen
+            // Contextuele logica
             if (memory[input]) {
                 response = memory[input];
-            }
-            // Dan in de enorme voorkennis
-            else if (defaultKnowledge[input]) {
-                response = defaultKnowledge[input];
-            }
-            // Basisreacties
-            else {
+            } else if (findSimilarQuestion(input)) {
+                response = findSimilarQuestion(input);
+            } else if (searchWebsiteKnowledge(input)) {
+                response = searchWebsiteKnowledge(input);
+            } else {
+                // Basisreacties en context
                 if (input.includes("hallo")) {
                     response = "Hallo! Hoe kan ik je helpen?";
                 } else if (input.includes("hoe gaat het")) {
@@ -151,7 +107,6 @@
                 } else if (input.includes("wat is je naam")) {
                     response = "Ik ben FTJ Chatbot, een slimme Nederlandse chatbot.";
                 } else {
-                    // Kijk of er een reactiepatroon is op basis van vorige interacties
                     let lastAIResponse = getLastAIResponse();
                     if (lastAIResponse && reactionMemory[lastAIResponse]) {
                         response = reactionMemory[lastAIResponse];
@@ -161,6 +116,30 @@
 
             document.getElementById('response').innerText = response;
             updateHistory(input, response);
+        }
+
+        // Slim zoeken naar vergelijkbare vragen
+        function findSimilarQuestion(input) {
+            for (let q in memory) {
+                if (input.includes(q) || q.includes(input)) {
+                    return memory[q];
+                }
+            }
+            return null;
+        }
+
+        // Zoek in geleerde website info
+        function searchWebsiteKnowledge(input) {
+            for (let url in websiteKnowledge) {
+                let text = websiteKnowledge[url];
+                if (text.toLowerCase().includes(input)) {
+                    // Geef een samenvatting van de relevante info
+                    let idx = text.toLowerCase().indexOf(input);
+                    let snippet = text.substring(Math.max(0, idx-40), Math.min(text.length, idx+160));
+                    return `Volgens "${url}": ...${snippet}...`;
+                }
+            }
+            return null;
         }
 
         // Leerfunctie: leert vraag-antwoord én optioneel reactiepatroon
@@ -174,6 +153,22 @@
                 alert(`Ik heb geleerd dat als je '${question}' zegt, ik '${answer}' moet antwoorden.`);
             } else {
                 alert("Vul zowel een vraag als een antwoord in.");
+            }
+        }
+
+        // Van website leren (alleen mogelijk als CORS open is!)
+        async function learnFromWebsite() {
+            const url = document.getElementById('websiteInput').value.trim();
+            const status = document.getElementById('websiteStatus');
+            status.textContent = "Bezig met laden...";
+            try {
+                const res = await fetch(url);
+                const text = await res.text();
+                websiteKnowledge[url] = text;
+                localStorage.setItem('chatbotWebsiteKnowledge', JSON.stringify(websiteKnowledge));
+                status.textContent = "Geleerd van website!";
+            } catch (e) {
+                status.textContent = "Kon niet leren van deze website (CORS probleem of URL fout).";
             }
         }
 
