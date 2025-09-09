@@ -2,65 +2,22 @@
 <html lang="nl">
 <head>
     <meta charset="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FTJ Chatbot (super slim, beta)</title>
+    <title>Chatbot Universeel</title>
     <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #007BFF;
-        }
-        .container {
-            text-align: center;
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 400px;
-            margin: 20px;
-        }
-        input, button {
-            padding: 10px;
-            margin-top: 10px;
-            width: 100%;
-        }
-        .learn-container {
-            margin-top: 20px;
-            text-align: left;
-        }
-        .history {
-            text-align: left;
-            margin-top: 20px;
-            max-height: 150px;
-            overflow-y: auto;
-            background-color: #f9f9f9;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
-        }
-        .history div {
-            margin-bottom: 10px;
-        }
-        .website-container {
-            margin-top: 20px;
-            text-align: left;
-            font-size: 0.95em;
-            background: #eef;
-            border-radius: 7px;
-            padding: 10px;
-        }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; background-color: #007BFF; }
+        .container { text-align: center; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); width: 400px; margin: 20px; }
+        input, button { padding: 10px; margin-top: 10px; width: 100%; }
+        .learn-container { margin-top: 20px; text-align: left; }
+        .history { text-align: left; margin-top: 20px; max-height: 150px; overflow-y: auto; background-color: #f9f9f9; padding: 10px; border-radius: 5px; box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1); }
+        .history div { margin-bottom: 10px; }
+        .knowledge-container { margin-top: 20px; text-align: left; font-size: 0.95em; background: #eef; border-radius: 7px; padding: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Vraag de Chatbot</h1>
-        <input type="text" id="userInput" placeholder="Stel een vraag...">
+        <input type="text" id="userInput" placeholder="Stel een vraag in elke taal...">
         <button onclick="askBot()">Vraag</button>
         <p id="response"></p>
         <div class="learn-container">
@@ -69,44 +26,125 @@
             <input type="text" id="learnAnswer" placeholder="Dan geeft AI antwoord...">
             <button onclick="learn()">Leer de AI</button>
         </div>
-        <div class="website-container">
-            <h3>Leer van een website</h3>
-            <input type="text" id="websiteInput" placeholder="Voer een URL in (met open CORS)">
-            <button onclick="learnFromWebsite()">Leer van website</button>
-            <p id="websiteStatus"></p>
+        <div class="knowledge-container" id="knowledgeContainer">
+            <h3>Vooraf ingestelde kennis</h3>
+            <ul id="knowledgeList"></ul>
         </div>
         <div class="history" id="history">
             <h3>Gesprekgeschiedenis</h3>
         </div>
     </div>
     <script>
-        // Slim geheugen: leert alles wat je invoert en onthoudt context
+        // Heel veel voorkennis, uitgebreid en divers
+        const defaultKnowledge = {
+            "wat is de hoofdstad van nederland": "De hoofdstad van Nederland is Amsterdam.",
+            "wie is de koning van nederland": "De koning van Nederland is Willem-Alexander.",
+            "wat is javascript": "JavaScript is een programmeertaal die veel gebruikt wordt voor webontwikkeling.",
+            "what is javascript": "JavaScript is a programming language commonly used for web development.",
+            "qu'est-ce que javascript": "JavaScript est un langage de programmation principalement utilisé pour le développement web.",
+            "was ist javascript": "JavaScript ist eine Programmiersprache, die häufig für die Webentwicklung verwendet wird.",
+            "¿qué es javascript?": "JavaScript es un lenguaje de programación utilizado principalmente para el desarrollo web.",
+            // Voeg meer talen en kennis toe!
+        };
+
         let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
         let reactionMemory = JSON.parse(localStorage.getItem('chatbotReactionMemory')) || {};
-        let websiteKnowledge = JSON.parse(localStorage.getItem('chatbotWebsiteKnowledge')) || {};
         const historyElement = document.getElementById('history');
+        const knowledgeList = document.getElementById('knowledgeList');
+        showKnowledge();
 
-        // Chatbot engine: slim, contextueel en flexibel
-        function askBot() {
-            const input = document.getElementById('userInput').value.toLowerCase().trim();
-            let response = "Sorry, dat weet ik (nog) niet.";
+        // Toon alle voorkennis in het scherm
+        function showKnowledge() {
+            knowledgeList.innerHTML = '';
+            Object.keys(defaultKnowledge).forEach(q => {
+                const li = document.createElement('li');
+                li.textContent = `Vraag: "${q}" → Antwoord: "${defaultKnowledge[q]}"`;
+                knowledgeList.appendChild(li);
+            });
+        }
 
-            // Contextuele logica
-            if (memory[input]) {
+        // Detecteert de taal van de vraag
+        async function detectLanguage(text) {
+            try {
+                const res = await fetch("https://libretranslate.de/detect", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ q: text })
+                });
+                const data = await res.json();
+                return data[0]?.language || "nl";
+            } catch {
+                return "nl";
+            }
+        }
+
+        // Vertaalt tekst (indien nodig)
+        async function translate(text, from, to) {
+            if(from === to) return text;
+            try {
+                const res = await fetch("https://libretranslate.de/translate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ q: text, source: from, target: to })
+                });
+                const data = await res.json();
+                return data.translatedText;
+            } catch {
+                return text;
+            }
+        }
+
+        // Website info: haalt titel van een webpagina op (via een proxy API)
+        async function getWebsiteTitle(url) {
+            // Externe proxy om CORS te omzeilen, bijvoorbeeld https://scrape.do of een eigen server
+            // Hier als voorbeeld: een publieke API die een HTML-pagina ophaalt
+            try {
+                const proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(url);
+                const res = await fetch(proxyUrl);
+                const data = await res.json();
+                const match = data.contents.match(/<title[^>]*>([^<]+)<\/title>/i);
+                return match ? match[1] : "Geen titel gevonden.";
+            } catch {
+                return "Kon de website niet ophalen.";
+            }
+        }
+
+        async function askBot() {
+            const inputRaw = document.getElementById('userInput').value.trim();
+            if (!inputRaw) return;
+            let input = inputRaw.toLowerCase();
+            let response = "Sorry, dat weet ik niet.";
+            let lang = await detectLanguage(inputRaw);
+
+            // Vragen over websites herkennen
+            const urlMatch = inputRaw.match(/https?:\/\/[^\s]+/);
+            if (urlMatch) {
+                const url = urlMatch[0];
+                // Vraag over titel?
+                if (/titel|title|título|titre|название|tytuł|título/.test(inputRaw.toLowerCase())) {
+                    const title = await getWebsiteTitle(url);
+                    response = `De titel van ${url} is: "${title}"`;
+                }
+                // Wil je andere info, kun je hier uitbreiden!
+            }
+            // Custom geheugen
+            else if (memory[input]) {
                 response = memory[input];
-            } else if (findSimilarQuestion(input)) {
-                response = findSimilarQuestion(input);
-            } else if (searchWebsiteKnowledge(input)) {
-                response = searchWebsiteKnowledge(input);
-            } else {
-                // Basisreacties en context
-                if (input.includes("hallo")) {
+            }
+            // Default knowledge
+            else if (defaultKnowledge[input]) {
+                response = defaultKnowledge[input];
+            }
+            // Basisreacties
+            else {
+                if (input.includes("hallo") || input.includes("hello") || input.includes("bonjour") || input.includes("hola") || input.includes("hallo") || input.includes("ciao")) {
                     response = "Hallo! Hoe kan ik je helpen?";
-                } else if (input.includes("hoe gaat het")) {
+                } else if (input.includes("hoe gaat het") || input.includes("how are you") || input.includes("comment ça va") || input.includes("como estas")) {
                     response = "Met mij gaat het goed, dank je!";
-                } else if (input.includes("wat is je naam")) {
-                    response = "Ik ben FTJ Chatbot, een slimme Nederlandse chatbot.";
+                } else if (input.includes("wat is je naam") || input.includes("what is your name") || input.includes("quel est ton nom") || input.includes("cómo te llamas")) {
+                    response = "Ik ben een universele chatbot.";
                 } else {
+                    // Reactiepatroon op basis van vorige interacties
                     let lastAIResponse = getLastAIResponse();
                     if (lastAIResponse && reactionMemory[lastAIResponse]) {
                         response = reactionMemory[lastAIResponse];
@@ -114,39 +152,18 @@
                 }
             }
 
+            // Vertaal het antwoord naar de taal van de vraag
+            if(lang !== "nl") {
+                response = await translate(response, "nl", lang);
+            }
+
             document.getElementById('response').innerText = response;
-            updateHistory(input, response);
+            updateHistory(inputRaw, response);
         }
 
-        // Slim zoeken naar vergelijkbare vragen
-        function findSimilarQuestion(input) {
-            for (let q in memory) {
-                if (input.includes(q) || q.includes(input)) {
-                    return memory[q];
-                }
-            }
-            return null;
-        }
-
-        // Zoek in geleerde website info
-        function searchWebsiteKnowledge(input) {
-            for (let url in websiteKnowledge) {
-                let text = websiteKnowledge[url];
-                if (text.toLowerCase().includes(input)) {
-                    // Geef een samenvatting van de relevante info
-                    let idx = text.toLowerCase().indexOf(input);
-                    let snippet = text.substring(Math.max(0, idx-40), Math.min(text.length, idx+160));
-                    return `Volgens "${url}": ...${snippet}...`;
-                }
-            }
-            return null;
-        }
-
-        // Leerfunctie: leert vraag-antwoord én optioneel reactiepatroon
         function learn() {
             const question = document.getElementById('learnQuestion').value.toLowerCase().trim();
             const answer = document.getElementById('learnAnswer').value.trim();
-
             if (question && answer) {
                 memory[question] = answer;
                 localStorage.setItem('chatbotMemory', JSON.stringify(memory));
@@ -156,23 +173,6 @@
             }
         }
 
-        // Van website leren (alleen mogelijk als CORS open is!)
-        async function learnFromWebsite() {
-            const url = document.getElementById('websiteInput').value.trim();
-            const status = document.getElementById('websiteStatus');
-            status.textContent = "Bezig met laden...";
-            try {
-                const res = await fetch(url);
-                const text = await res.text();
-                websiteKnowledge[url] = text;
-                localStorage.setItem('chatbotWebsiteKnowledge', JSON.stringify(websiteKnowledge));
-                status.textContent = "Geleerd van website!";
-            } catch (e) {
-                status.textContent = "Kon niet leren van deze website (CORS probleem of URL fout).";
-            }
-        }
-
-        // Bonus: leert van jouw reactie op het antwoord van de AI
         function updateHistory(question, answer) {
             const entry = document.createElement('div');
             entry.innerHTML = `<strong>Jij:</strong> ${question}<br><br><strong>AI:</strong> ${answer}<br>
@@ -181,7 +181,6 @@
             historyElement.appendChild(entry);
         }
 
-        // Slaat reactie van gebruiker op AI-antwoord op
         window.saveReaction = function(aiAnswer, userReaction) {
             if (aiAnswer && userReaction) {
                 reactionMemory[aiAnswer] = userReaction;
@@ -189,7 +188,6 @@
             }
         }
 
-        // Haal het laatste AI-antwoord uit de geschiedenis
         function getLastAIResponse() {
             const divs = historyElement.querySelectorAll('div');
             if (divs.length > 0) {
