@@ -14,7 +14,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: #007BFF; /* Blauwe achtergrond */
+            background-color: #007BFF;
         }
         .container {
             text-align: center;
@@ -22,7 +22,7 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 400px; /* Verhoogde breedte */
+            width: 400px;
             margin: 20px;
         }
         input, button {
@@ -47,6 +47,14 @@
         .history div {
             margin-bottom: 10px;
         }
+        .knowledge-container {
+            margin-top: 20px;
+            text-align: left;
+            font-size: 0.95em;
+            background: #eef;
+            border-radius: 7px;
+            padding: 10px;
+        }
     </style>
 </head>
 <body>
@@ -55,36 +63,99 @@
         <input type="text" id="userInput" placeholder="Stel een vraag...">
         <button onclick="askBot()">Vraag</button>
         <p id="response"></p>
-
         <div class="learn-container">
             <h2>Leren</h2>
             <input type="text" id="learnQuestion" placeholder="Als gebruiker vraagt...">
             <input type="text" id="learnAnswer" placeholder="Dan geeft AI antwoord...">
             <button onclick="learn()">Leer de AI</button>
         </div>
-
+        <div class="knowledge-container" id="knowledgeContainer">
+            <h3>Vooraf ingestelde kennis</h3>
+            <ul id="knowledgeList"></ul>
+        </div>
         <div class="history" id="history">
             <h3>Gesprekgeschiedenis</h3>
         </div>
     </div>
-
     <script>
-        let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
-        const historyElement = document.getElementById('history');
+        // Heel veel voorkennis, uitgebreid en divers
+        const defaultKnowledge = {
+            "wat is de hoofdstad van nederland": "De hoofdstad van Nederland is Amsterdam.",
+            "wie is de koning van nederland": "De koning van Nederland is Willem-Alexander.",
+            "wat is de grootste planeet": "De grootste planeet in ons zonnestelsel is Jupiter.",
+            "wie heeft de relativiteitstheorie bedacht": "Albert Einstein heeft de relativiteitstheorie bedacht.",
+            "wat is het hoogste gebouw ter wereld": "Het hoogste gebouw ter wereld is de Burj Khalifa in Dubai.",
+            "wat is 2 + 2": "2 + 2 is 4.",
+            "noem drie nederlandse provincies": "Drie Nederlandse provincies zijn: Noord-Holland, Zuid-Holland, en Utrecht.",
+            "wie is de president van de vs": "De president van de Verenigde Staten verandert; in 2024 is dat Joe Biden.",
+            "wat is het snelste landdier": "Het snelste landdier is de cheetah.",
+            "hoe werkt fotosynthese": "Fotosynthese is het proces waarbij planten zonlicht, water en koolstofdioxide omzetten in zuurstof en glucose.",
+            "wat is javascript": "JavaScript is een programmeertaal die veel gebruikt wordt voor webontwikkeling.",
+            "wat betekent 'bonjour'": "'Bonjour' betekent 'goedendag' in het Frans.",
+            "hoe zeg je hallo in spaans": "'Hola' is hallo in het Spaans.",
+            "wat is de afstand tussen aarde en maan": "Gemiddeld is de afstand tussen de aarde en de maan ongeveer 384.400 kilometer.",
+            "wie schreef harry potter": "J.K. Rowling schreef Harry Potter.",
+            "wat is het kleinste land ter wereld": "Het kleinste land ter wereld is Vaticaanstad.",
+            "wat is de waarde van pi": "Pi is ongeveer 3,14159.",
+            "wat is de kleur van de zon": "De zon lijkt geel, maar is eigenlijk wit als je het buiten de atmosfeer bekijkt.",
+            "wat is een chatbot": "Een chatbot is een computerprogramma dat gesprekken voert met mensen.",
+            "wie is rembrandt": "Rembrandt van Rijn was een beroemde Nederlandse schilder uit de 17e eeuw.",
+            "hoe werkt wifi": "Wifi gebruikt radiogolven om draadloos data te versturen tussen apparaten en een router.",
+            "wat is de hoofdstad van frankrijk": "De hoofdstad van Frankrijk is Parijs.",
+            "wie was napoleon": "Napoleon Bonaparte was een Franse militaire leider en keizer.",
+            "wat is het langste dier": "De blauwe vinvis is het langste dier ter wereld.",
+            "wat is het koudste continent": "Antarctica is het koudste continent.",
+            "wat is een zwart gat": "Een zwart gat is een gebied in de ruimte waar de zwaartekracht zo sterk is dat niets kan ontsnappen.",
+            "wat is de grootste oceaan": "De grootste oceaan is de Stille Oceaan.",
+            "wie ontdekte penicilline": "Alexander Fleming ontdekte penicilline.",
+            "wat is het symbool voor water": "Het scheikundig symbool voor water is H₂O.",
+            // Je kunt hier eenvoudig honderden of duizenden kennisvragen toevoegen!
+        };
 
+        // Extra geheugen: leert niet alleen op vraag maar ook op reactie
+        let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
+        let reactionMemory = JSON.parse(localStorage.getItem('chatbotReactionMemory')) || {};
+        const historyElement = document.getElementById('history');
+        const knowledgeList = document.getElementById('knowledgeList');
+
+        // Toon alle voorkennis in het scherm
+        function showKnowledge() {
+            knowledgeList.innerHTML = '';
+            Object.keys(defaultKnowledge).forEach(q => {
+                const li = document.createElement('li');
+                li.textContent = `Vraag: "${q}" → Antwoord: "${defaultKnowledge[q]}"`;
+                knowledgeList.appendChild(li);
+            });
+        }
+        showKnowledge();
+
+        // Chatbot: zoekt in memory, default kennis, en leert van reacties
         function askBot() {
-            const input = document.getElementById('userInput').value.toLowerCase();
+            const input = document.getElementById('userInput').value.toLowerCase().trim();
             let response = "Sorry, dat weet ik niet.";
 
+            // Kijk eerst in custom geheugen
             if (memory[input]) {
                 response = memory[input];
-            } else {
+            }
+            // Dan in de enorme voorkennis
+            else if (defaultKnowledge[input]) {
+                response = defaultKnowledge[input];
+            }
+            // Basisreacties
+            else {
                 if (input.includes("hallo")) {
                     response = "Hallo! Hoe kan ik je helpen?";
                 } else if (input.includes("hoe gaat het")) {
                     response = "Met mij gaat het goed, dank je!";
                 } else if (input.includes("wat is je naam")) {
-                    response = "Ik ben een eenvoudige chatbot.";
+                    response = "Ik ben FTJ Chatbot, een slimme Nederlandse chatbot.";
+                } else {
+                    // Kijk of er een reactiepatroon is op basis van vorige interacties
+                    let lastAIResponse = getLastAIResponse();
+                    if (lastAIResponse && reactionMemory[lastAIResponse]) {
+                        response = reactionMemory[lastAIResponse];
+                    }
                 }
             }
 
@@ -92,6 +163,7 @@
             updateHistory(input, response);
         }
 
+        // Leerfunctie: leert vraag-antwoord én optioneel reactiepatroon
         function learn() {
             const question = document.getElementById('learnQuestion').value.toLowerCase().trim();
             const answer = document.getElementById('learnAnswer').value.trim();
@@ -105,10 +177,34 @@
             }
         }
 
+        // Bonus: leert van jouw reactie op het antwoord van de AI
         function updateHistory(question, answer) {
             const entry = document.createElement('div');
-            entry.innerHTML = `<strong>Jij:</strong> ${question}<br><br><strong>AI:</strong> ${answer}`;
+            entry.innerHTML = `<strong>Jij:</strong> ${question}<br><br><strong>AI:</strong> ${answer}<br>
+                <input type="text" placeholder="Hoe reageer je op dit AI-antwoord?" onblur="saveReaction('${answer}', this.value)">
+            `;
             historyElement.appendChild(entry);
+        }
+
+        // Slaat reactie van gebruiker op AI-antwoord op
+        window.saveReaction = function(aiAnswer, userReaction) {
+            if (aiAnswer && userReaction) {
+                reactionMemory[aiAnswer] = userReaction;
+                localStorage.setItem('chatbotReactionMemory', JSON.stringify(reactionMemory));
+            }
+        }
+
+        // Haal het laatste AI-antwoord uit de geschiedenis
+        function getLastAIResponse() {
+            const divs = historyElement.querySelectorAll('div');
+            if (divs.length > 0) {
+                const lastDiv = divs[divs.length - 1];
+                const aiMatch = lastDiv.innerHTML.match(/<strong>AI:<\/strong> (.+?)(<br|$)/);
+                if (aiMatch && aiMatch[1]) {
+                    return aiMatch[1].trim();
+                }
+            }
+            return null;
         }
     </script>
 </body>
