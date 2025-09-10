@@ -3,44 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TJ Chatbot versie 2.0</title>
+<title>TJ Chatbot 2.0 — Brede Balk</title>
 <style>
     body {
         margin: 0;
         font-family: Arial, sans-serif;
         display: flex;
+        flex-direction: column;
         height: 100vh;
-        background: #f0f2f5;
-    }
-    /* Zijpaneel */
-    .sidebar {
-        width: 25%;
-        background: #fff;
-        border-right: 1px solid #ccc;
-        display: flex;
-        flex-direction: column;
-        padding: 15px;
-        box-sizing: border-box;
-    }
-    .learn-container, .read-container {
-        margin-bottom: 20px;
-    }
-    h2 {
-        margin-top: 0;
-    }
-    input, button {
-        width: 100%;
-        padding: 8px;
-        margin-top: 5px;
-        box-sizing: border-box;
-    }
-    /* Chatgedeelte */
-    .chat-container {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
         background: #e5ddd5;
     }
+
     .messages {
         flex: 1;
         padding: 15px;
@@ -48,6 +21,7 @@
         display: flex;
         flex-direction: column;
     }
+
     .message {
         max-width: 70%;
         padding: 10px;
@@ -55,78 +29,63 @@
         border-radius: 8px;
         animation: fadeIn 0.3s ease-in-out;
     }
+
     .user {
         align-self: flex-end;
         background: #dcf8c6;
     }
+
     .bot {
         align-self: flex-start;
         background: #fff;
     }
+
     @keyframes fadeIn {
         from {opacity: 0; transform: translateY(10px);}
         to {opacity: 1; transform: translateY(0);}
     }
-    /* Typebalk onder */
+
     .input-area {
         display: flex;
         padding: 10px;
         background: #fff;
         border-top: 1px solid #ccc;
+        width: 100%;
+        box-sizing: border-box;
     }
+
     .input-area input {
         flex: 1;
-        padding: 10px;
+        padding: 12px;
         border: 1px solid #ccc;
-        border-radius: 20px;
+        border-radius: 25px;
         outline: none;
+        font-size: 16px;
     }
+
     .input-area button {
         margin-left: 10px;
-        padding: 10px 15px;
+        padding: 12px 18px;
         border: none;
         border-radius: 50%;
         background: #007bff;
         color: white;
         cursor: pointer;
+        font-size: 18px;
     }
 </style>
 </head>
 <body>
 
-<div class="sidebar">
-    <div class="learn-container">
-        <h2>Leren</h2>
-        <input type="text" id="learnQuestion" placeholder="Als gebruiker vraagt...">
-        <input type="text" id="learnAnswer" placeholder="Dan geeft AI antwoord...">
-        <button onclick="learn()">Leer de AI</button>
-    </div>
-    <div class="read-container">
-        <h2>Leesgedeelte</h2>
-        <p>Hier kan je extra info tonen of samenvattingen.</p>
-    </div>
-</div>
+<div class="messages" id="messages"></div>
 
-<div class="chat-container">
-    <div class="messages" id="messages"></div>
-    <div class="input-area">
-        <input type="text" id="userInput" placeholder="Typ je bericht...">
-        <button onclick="sendMessage()">➤</button>
-    </div>
+<div class="input-area">
+    <input type="text" id="userInput" placeholder="Typ je bericht...">
+    <button onclick="sendMessage()">➤</button>
 </div>
 
 <script>
 let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
-
-function learn() {
-    const q = document.getElementById('learnQuestion').value.toLowerCase().trim();
-    const a = document.getElementById('learnAnswer').value.trim();
-    if(q && a) {
-        memory[q] = a;
-        localStorage.setItem('chatbotMemory', JSON.stringify(memory));
-        alert("AI heeft dit geleerd!");
-    }
-}
 
 function sendMessage() {
     const input = document.getElementById('userInput');
@@ -171,6 +130,14 @@ function typeMessage(text) {
     }
     typing();
 }
+
+// Enter = verzenden
+document.getElementById('userInput').addEventListener('keydown', function(e) {
+    if(e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
+    }
+});
 </script>
 
 </body>
