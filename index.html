@@ -3,25 +3,44 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TJ Chatbot 2.1</title>
+<title>TJ Chatbot versie 2.0</title>
 <style>
     body {
         margin: 0;
         font-family: Arial, sans-serif;
         display: flex;
-        flex-direction: column;
         height: 100vh;
         background: #f0f2f5;
     }
-
+    /* Zijpaneel */
+    .sidebar {
+        width: 25%;
+        background: #fff;
+        border-right: 1px solid #ccc;
+        display: flex;
+        flex-direction: column;
+        padding: 15px;
+        box-sizing: border-box;
+    }
+    .learn-container, .read-container {
+        margin-bottom: 20px;
+    }
+    h2 {
+        margin-top: 0;
+    }
+    input, button {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        box-sizing: border-box;
+    }
+    /* Chatgedeelte */
     .chat-container {
         flex: 1;
         display: flex;
         flex-direction: column;
         background: #e5ddd5;
-        overflow: hidden;
     }
-
     .messages {
         flex: 1;
         padding: 15px;
@@ -29,7 +48,6 @@
         display: flex;
         flex-direction: column;
     }
-
     .message {
         max-width: 70%;
         padding: 10px;
@@ -37,86 +55,60 @@
         border-radius: 8px;
         animation: fadeIn 0.3s ease-in-out;
     }
-
     .user {
         align-self: flex-end;
         background: #dcf8c6;
     }
-
     .bot {
         align-self: flex-start;
         background: #fff;
     }
-
     @keyframes fadeIn {
         from {opacity: 0; transform: translateY(10px);}
         to {opacity: 1; transform: translateY(0);}
     }
-
+    /* Typebalk onder */
     .input-area {
         display: flex;
         padding: 10px;
         background: #fff;
         border-top: 1px solid #ccc;
     }
-
     .input-area input {
         flex: 1;
-        padding: 12px;
+        padding: 10px;
         border: 1px solid #ccc;
-        border-radius: 25px;
+        border-radius: 20px;
         outline: none;
-        font-size: 16px;
     }
-
     .input-area button {
         margin-left: 10px;
-        padding: 12px 18px;
+        padding: 10px 15px;
         border: none;
         border-radius: 50%;
         background: #007bff;
         color: white;
         cursor: pointer;
-        font-size: 18px;
-    }
-
-    .menu-toggle {
-        background: #007bff;
-        color: white;
-        padding: 10px;
-        border: none;
-        width: 100%;
-        font-size: 16px;
-        cursor: pointer;
-    }
-
-    .learn-menu {
-        display: none;
-        background: #fff;
-        padding: 15px;
-        border-top: 1px solid #ccc;
-    }
-
-    .learn-menu input, .learn-menu button {
-        width: 100%;
-        padding: 8px;
-        margin-top: 5px;
-        box-sizing: border-box;
     }
 </style>
 </head>
 <body>
 
-<div class="chat-container">
-    <div class="messages" id="messages"></div>
-
-    <button class="menu-toggle" onclick="toggleLearn()">📚 Leer de AI</button>
-    <div class="learn-menu" id="learnMenu">
+<div class="sidebar">
+    <div class="learn-container">
+        <h2>Leren</h2>
         <input type="text" id="learnQuestion" placeholder="Als gebruiker vraagt...">
         <input type="text" id="learnAnswer" placeholder="Dan geeft AI antwoord...">
-        <button onclick="learn()">Opslaan</button>
+        <button onclick="learn()">Leer de AI</button>
     </div>
+    <div class="read-container">
+        <h2>Leesgedeelte</h2>
+        <p>Hier kan je extra info tonen of samenvattingen.</p>
+    </div>
+</div>
 
+<div class="chat-container">
+    <div class="messages" id="messages"></div>
     <div class="input-area">
         <input type="text" id="userInput" placeholder="Typ je bericht...">
         <button onclick="sendMessage()">➤</button>
@@ -126,10 +118,60 @@
 <script>
 let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
 
-function toggleLearn() {
-    const menu = document.getElementById('learnMenu');
-    menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+function learn() {
+    const q = document.getElementById('learnQuestion').value.toLowerCase().trim();
+    const a = document.getElementById('learnAnswer').value.trim();
+    if(q && a) {
+        memory[q] = a;
+        localStorage.setItem('chatbotMemory', JSON.stringify(memory));
+        alert("AI heeft dit geleerd!");
+    }
 }
 
-function learn() {
-    const q = document.get
+function sendMessage() {
+    const input = document.getElementById('userInput');
+    const text = input.value.trim();
+    if(!text) return;
+    addMessage(text, 'user');
+    input.value = '';
+    setTimeout(() => botReply(text), 500);
+}
+
+function addMessage(text, sender) {
+    const msgContainer = document.createElement('div');
+    msgContainer.classList.add('message', sender);
+    msgContainer.textContent = text;
+    document.getElementById('messages').appendChild(msgContainer);
+    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+}
+
+function botReply(userText) {
+    let reply = "Sorry, dat weet ik nog niet.";
+    const lower = userText.toLowerCase();
+    if(memory[lower]) reply = memory[lower];
+    else if(lower.includes("hallo")) reply = "Hallo! Hoe kan ik je helpen?";
+    else if(lower.includes("hoe gaat het")) reply = "Met mij gaat het goed, dank je!";
+    else if(lower.includes("wat is je naam")) reply = "Ik ben TJ Chatbot 2.0.";
+
+    typeMessage(reply);
+}
+
+function typeMessage(text) {
+    const msgContainer = document.createElement('div');
+    msgContainer.classList.add('message', 'bot');
+    document.getElementById('messages').appendChild(msgContainer);
+
+    let i = 0;
+    function typing() {
+        if(i < text.length) {
+            msgContainer.textContent += text.charAt(i);
+            i++;
+            setTimeout(typing, 40);
+        }
+    }
+    typing();
+}
+</script>
+
+</body>
+</html>
