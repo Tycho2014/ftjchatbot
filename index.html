@@ -166,7 +166,6 @@ function wisGeheugen() {
             if (question && answer) {
                 memory[question] = answer;
                 localStorage.setItem('chatbotMemory', JSON.stringify(memory));
-                alert(`Ik heb geleerd dat als je '${question}' zegt, ik '${answer}' moet antwoorden.`);
             } else {
                 alert("Vul zowel een vraag als een antwoord in.");
             }
