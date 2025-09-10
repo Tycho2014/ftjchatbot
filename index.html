@@ -1,221 +1,177 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TJ Chatbot</title>
-    <link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #007BFF;
-        }
-        .container {
-            text-align: center;
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 400px;
-            margin: 20px;
-        }
-        input, button {
-            padding: 10px;
-            margin-top: 10px;
-            width: 100%;
-        }
-        .learn-container {
-            margin-top: 20px;
-            text-align: left;
-        }
-        .history {
-            text-align: left;
-            margin-top: 20px;
-            max-height: 150px;
-            overflow-y: auto;
-            background-color: #f9f9f9;
-            padding: 10px;
-            border-radius: 5px;
-            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
-        }
-        .history div {
-            margin-bottom: 10px;
-        }
-        .website-container {
-            margin-top: 20px;
-            text-align: left;
-            font-size: 0.95em;
-            background: #eef;
-            border-radius: 7px;
-            padding: 10px;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TJ Chatbot 2.0</title>
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        display: flex;
+        height: 100vh;
+        background: #f0f2f5;
+    }
+    /* Zijpaneel */
+    .sidebar {
+        width: 25%;
+        background: #fff;
+        border-right: 1px solid #ccc;
+        display: flex;
+        flex-direction: column;
+        padding: 15px;
+        box-sizing: border-box;
+    }
+    .learn-container, .read-container {
+        margin-bottom: 20px;
+    }
+    h2 {
+        margin-top: 0;
+    }
+    input, button {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        box-sizing: border-box;
+    }
+    /* Chatgedeelte */
+    .chat-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #e5ddd5;
+    }
+    .messages {
+        flex: 1;
+        padding: 15px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+    .message {
+        max-width: 70%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        animation: fadeIn 0.3s ease-in-out;
+    }
+    .user {
+        align-self: flex-end;
+        background: #dcf8c6;
+    }
+    .bot {
+        align-self: flex-start;
+        background: #fff;
+    }
+    @keyframes fadeIn {
+        from {opacity: 0; transform: translateY(10px);}
+        to {opacity: 1; transform: translateY(0);}
+    }
+    /* Typebalk onder */
+    .input-area {
+        display: flex;
+        padding: 10px;
+        background: #fff;
+        border-top: 1px solid #ccc;
+    }
+    .input-area input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 20px;
+        outline: none;
+    }
+    .input-area button {
+        margin-left: 10px;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 50%;
+        background: #007bff;
+        color: white;
+        cursor: pointer;
+    }
+</style>
 </head>
 <body>
-    <button onclick="wisGeheugen()">Wis Geheugen</button>
+
+<div class="sidebar">
+    <div class="learn-container">
+        <h2>Leren</h2>
+        <input type="text" id="learnQuestion" placeholder="Als gebruiker vraagt...">
+        <input type="text" id="learnAnswer" placeholder="Dan geeft AI antwoord...">
+        <button onclick="learn()">Leer de AI</button>
+    </div>
+    <div class="read-container">
+        <h2>Leesgedeelte</h2>
+        <p>Hier kan je extra info tonen of samenvattingen.</p>
+    </div>
+</div>
+
+<div class="chat-container">
+    <div class="messages" id="messages"></div>
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Typ je bericht...">
+        <button onclick="sendMessage()">➤</button>
+    </div>
+</div>
+
 <script>
-function wisGeheugen() {
-  // Wissen van lokale opslag (localStorage en sessionStorage)
-  localStorage.clear();
-  sessionStorage.clear();
+let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
 
-  // Wissen van gespreksgeschiedenis (voorbeeld)
-  if (typeof window.conversationHistory !== "undefined") {
-    window.conversationHistory = [];
-  }
+function learn() {
+    const q = document.getElementById('learnQuestion').value.toLowerCase().trim();
+    const a = document.getElementById('learnAnswer').value.trim();
+    if(q && a) {
+        memory[q] = a;
+        localStorage.setItem('chatbotMemory', JSON.stringify(memory));
+        alert("AI heeft dit geleerd!");
+    }
+}
 
-  // Eventueel: UI updaten
-  alert("Geheugen is gewist!");
+function sendMessage() {
+    const input = document.getElementById('userInput');
+    const text = input.value.trim();
+    if(!text) return;
+    addMessage(text, 'user');
+    input.value = '';
+    setTimeout(() => botReply(text), 500);
+}
+
+function addMessage(text, sender) {
+    const msgContainer = document.createElement('div');
+    msgContainer.classList.add('message', sender);
+    msgContainer.textContent = text;
+    document.getElementById('messages').appendChild(msgContainer);
+    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+}
+
+function botReply(userText) {
+    let reply = "Sorry, dat weet ik nog niet.";
+    const lower = userText.toLowerCase();
+    if(memory[lower]) reply = memory[lower];
+    else if(lower.includes("hallo")) reply = "Hallo! Hoe kan ik je helpen?";
+    else if(lower.includes("hoe gaat het")) reply = "Met mij gaat het goed, dank je!";
+    else if(lower.includes("wat is je naam")) reply = "Ik ben TJ Chatbot 2.0.";
+
+    typeMessage(reply);
+}
+
+function typeMessage(text) {
+    const msgContainer = document.createElement('div');
+    msgContainer.classList.add('message', 'bot');
+    document.getElementById('messages').appendChild(msgContainer);
+
+    let i = 0;
+    function typing() {
+        if(i < text.length) {
+            msgContainer.textContent += text.charAt(i);
+            i++;
+            setTimeout(typing, 40);
+        }
+    }
+    typing();
 }
 </script>
-    <div class="container">
-        <h1>Vraag de Chatbot</h1>
-        <input type="text" id="userInput" placeholder="Stel een vraag...">
-        <button onclick="askBot()">Vraag</button>
-        <p id="response"></p>
-        <div class="learn-container">
-            <h2>Leren</h2>
-            <input type="text" id="learnQuestion" placeholder="Als gebruiker vraagt...">
-            <input type="text" id="learnAnswer" placeholder="Dan geeft AI antwoord...">
-            <button onclick="learn()">Leer de AI</button>
-        </div>
-        <div class="website-container">
-            <h3>Leer van een website</h3>
-            <input type="text" id="websiteInput" placeholder="Voer een URL in (met open CORS)">
-            <button onclick="learnFromWebsite()">Leer van website</button>
-            <p id="websiteStatus"></p>
-        </div>
-        <div class="history" id="history">
-            <h3>Gesprekgeschiedenis</h3>
-        </div>
-    </div>
-    <script>
-        // Slim geheugen: leert alles wat je invoert en onthoudt context
-        let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
-        let reactionMemory = JSON.parse(localStorage.getItem('chatbotReactionMemory')) || {};
-        let websiteKnowledge = JSON.parse(localStorage.getItem('chatbotWebsiteKnowledge')) || {};
-        const historyElement = document.getElementById('history');
 
-        // Chatbot engine: slim, contextueel en flexibel
-        function askBot() {
-            const input = document.getElementById('userInput').value.toLowerCase().trim();
-            let response = "Sorry, dat weet ik (nog) niet.";
-
-            // Contextuele logica
-            if (memory[input]) {
-                response = memory[input];
-            } else if (findSimilarQuestion(input)) {
-                response = findSimilarQuestion(input);
-            } else if (searchWebsiteKnowledge(input)) {
-                response = searchWebsiteKnowledge(input);
-            } else {
-                // Basisreacties en context
-                if (input.includes("hallo")) {
-                    response = "Hallo! Hoe kan ik je helpen?";
-                } else if (input.includes("hoe gaat het")) {
-                    response = "Met mij gaat het goed, dank je!";
-                } else if (input.includes("wat is je naam")) {
-                    response = "Ik ben FTJ Chatbot, een slimme Nederlandse chatbot.";
-                } else {
-                    let lastAIResponse = getLastAIResponse();
-                    if (lastAIResponse && reactionMemory[lastAIResponse]) {
-                        response = reactionMemory[lastAIResponse];
-                    }
-                }
-            }
-
-            document.getElementById('response').innerText = response;
-            updateHistory(input, response);
-        }
-
-        // Slim zoeken naar vergelijkbare vragen
-        function findSimilarQuestion(input) {
-            for (let q in memory) {
-                if (input.includes(q) || q.includes(input)) {
-                    return memory[q];
-                }
-            }
-            return null;
-        }
-
-        // Zoek in geleerde website info
-        function searchWebsiteKnowledge(input) {
-            for (let url in websiteKnowledge) {
-                let text = websiteKnowledge[url];
-                if (text.toLowerCase().includes(input)) {
-                    // Geef een samenvatting van de relevante info
-                    let idx = text.toLowerCase().indexOf(input);
-                    let snippet = text.substring(Math.max(0, idx-40), Math.min(text.length, idx+160));
-                    return `Volgens "${url}": ...${snippet}...`;
-                }
-            }
-            return null;
-        }
-
-        // Leerfunctie: leert vraag-antwoord én optioneel reactiepatroon
-        function learn() {
-            const question = document.getElementById('learnQuestion').value.toLowerCase().trim();
-            const answer = document.getElementById('learnAnswer').value.trim();
-
-            if (question && answer) {
-                memory[question] = answer;
-                localStorage.setItem('chatbotMemory', JSON.stringify(memory));
-            } else {
-                alert("Vul zowel een vraag als een antwoord in.");
-            }
-        }
-
-        // Van website leren (alleen mogelijk als CORS open is!)
-        async function learnFromWebsite() {
-            const url = document.getElementById('websiteInput').value.trim();
-            const status = document.getElementById('websiteStatus');
-            status.textContent = "Bezig met laden...";
-            try {
-                const res = await fetch(url);
-                const text = await res.text();
-                websiteKnowledge[url] = text;
-                localStorage.setItem('chatbotWebsiteKnowledge', JSON.stringify(websiteKnowledge));
-                status.textContent = "Geleerd van website!";
-            } catch (e) {
-                status.textContent = "Kon niet leren van deze website (CORS probleem of URL fout).";
-            }
-        }
-
-        // Bonus: leert van jouw reactie op het antwoord van de AI
-        function updateHistory(question, answer) {
-            const entry = document.createElement('div');
-            entry.innerHTML = `<strong>Jij:</strong> ${question}<br><br><strong>AI:</strong> ${answer}<br>
-                <input type="text" placeholder="Hoe reageer je op dit AI-antwoord?" onblur="saveReaction('${answer}', this.value)">
-            `;
-            historyElement.appendChild(entry);
-        }
-
-        // Slaat reactie van gebruiker op AI-antwoord op
-        window.saveReaction = function(aiAnswer, userReaction) {
-            if (aiAnswer && userReaction) {
-                reactionMemory[aiAnswer] = userReaction;
-                localStorage.setItem('chatbotReactionMemory', JSON.stringify(reactionMemory));
-            }
-        }
-
-        // Haal het laatste AI-antwoord uit de geschiedenis
-        function getLastAIResponse() {
-            const divs = historyElement.querySelectorAll('div');
-            if (divs.length > 0) {
-                const lastDiv = divs[divs.length - 1];
-                const aiMatch = lastDiv.innerHTML.match(/<strong>AI:<\/strong> (.+?)(<br|$)/);
-                if (aiMatch && aiMatch[1]) {
-                    return aiMatch[1].trim();
-                }
-            }
-            return null;
-        }
-    </script>
 </body>
 </html>
