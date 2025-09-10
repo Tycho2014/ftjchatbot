@@ -1,144 +1,49 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TJ Chatbot 2.1</title>
-<style>
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        background: #e5ddd5;
-    }
-
-    .messages {
-        flex: 1;
-        padding: 15px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .message {
-        max-width: 70%;
-        padding: 10px;
-        margin-bottom: 10px;
-        border-radius: 8px;
-        animation: fadeIn 0.3s ease-in-out;
-    }
-
-    .user {
-        align-self: flex-end;
-        background: #dcf8c6;
-    }
-
-    .bot {
-        align-self: flex-start;
-        background: #fff;
-    }
-
-    @keyframes fadeIn {
-        from {opacity: 0; transform: translateY(10px);}
-        to {opacity: 1; transform: translateY(0);}
-    }
-
-    .input-area {
-        display: flex;
-        padding: 10px;
-        background: #fff;
-        border-top: 1px solid #ccc;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .input-area input {
-        flex: 1;
-        padding: 12px;
-        border: 1px solid #ccc;
-        border-radius: 25px;
-        outline: none;
-        font-size: 16px;
-    }
-
-    .input-area button {
-        margin-left: 10px;
-        padding: 12px 18px;
-        border: none;
-        border-radius: 50%;
-        background: #007bff;
-        color: white;
-        cursor: pointer;
-        font-size: 18px;
-    }
-</style>
+  <meta charset="UTF-8">
+  <title>FTJ Chatbot AI</title>
+  <style>
+    #chat { margin-top: 2em; }
+    .user { color: blue; }
+    .ai { color: green; }
+  </style>
 </head>
 <body>
+  <input type="text" id="userInput" placeholder="Typ je vraag...">
+  <button onclick="sendMessage()">Versturen</button>
+  <div id="chat"></div>
 
-<div class="messages" id="messages"></div>
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById('userInput').value;
+      const chat = document.getElementById('chat');
+      chat.innerHTML += `<div class="user"><b>Jij:</b> ${input}</div>`;
 
-<div class="input-area">
-    <input type="text" id="userInput" placeholder="Typ je bericht...">
-    <button onclick="sendMessage()">➤</button>
-</div>
+      // 1. Zoek op het web (voorbeeld Bing)
+      const webResult = await fetch('https://api.bing.microsoft.com/v7.0/search?q=' + encodeURIComponent(input), {
+        headers: { 'Ocp-Apim-Subscription-Key': 'JOUW_BING_API_KEY' }
+      }).then(r => r.json()).catch(() => null);
 
-<script>
-let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
+      let webText = '';
+      if (webResult && webResult.webPages && webResult.webPages.value.length > 0) {
+        webText = webResult.webPages.value.map(v => v.snippet).join(' ');
+      }
 
-function sendMessage() {
-    const input = document.getElementById('userInput');
-    const text = input.value.trim();
-    if(!text) return;
-    addMessage(text, 'user');
-    input.value = '';
-    setTimeout(() => botReply(text), 500);
-}
+      // 2. Stuur prompt + webresultaat naar je AI tekstgenerator
+      const aiResponse = await fetch('https://jouw-ai-api-endpoint.com/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer 0c8f8ba5f237466084873422c2415350' // Jouw API-key
+        },
+        body: JSON.stringify({
+          prompt: input + "\nWeb resultaten: " + webText
+        })
+      }).then(r => r.json());
 
-function addMessage(text, sender) {
-    const msgContainer = document.createElement('div');
-    msgContainer.classList.add('message', sender);
-    msgContainer.textContent = text;
-    document.getElementById('messages').appendChild(msgContainer);
-    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
-}
-
-function botReply(userText) {
-    let reply = "Sorry, dat weet ik nog niet.";
-    const lower = userText.toLowerCase();
-    if(memory[lower]) reply = memory[lower];
-    else if(lower.includes("hallo")) reply = "Hallo! Hoe kan ik je helpen?";
-    else if(lower.includes("hoe gaat het")) reply = "Met mij gaat het goed, dank je!";
-    else if(lower.includes("wat is je naam")) reply = "Ik ben TJ Chatbot 2.0.";
-
-    typeMessage(reply);
-}
-
-function typeMessage(text) {
-    const msgContainer = document.createElement('div');
-    msgContainer.classList.add('message', 'bot');
-    document.getElementById('messages').appendChild(msgContainer);
-
-    let i = 0;
-    function typing() {
-        if(i < text.length) {
-            msgContainer.textContent += text.charAt(i);
-            i++;
-            setTimeout(typing, 40);
-        }
+      chat.innerHTML += `<div class="ai"><b>AI:</b> ${aiResponse.text}</div>`;
     }
-    typing();
-}
-
-// Enter = verzenden
-document.getElementById('userInput').addEventListener('keydown', function(e) {
-    if(e.key === 'Enter') {
-        e.preventDefault();
-        sendMessage();
-    }
-});
-</script>
-
+  </script>
 </body>
 </html>
