@@ -145,13 +145,37 @@
 let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
 let waitingForAnswer = null;
 
-// Vul standaard 1000 vraag-antwoordparen in als ze nog niet bestaan
+// 1️⃣ Voeg 1000 standaardvragen toe
 for (let i = 1; i <= 1000; i++) {
     const vraag = `vraag ${i}`;
     if (!memory[vraag]) {
         memory[vraag] = `Dit is het antwoord op vraag ${i}`;
     }
 }
+
+// 2️⃣ Voeg standaardregels toe (begroetingen, AI-info, enz.)
+const standaardregels = {
+    "hey": "Hallo! Ik ben een AI en ik ben hier om je te helpen.",
+    "hoi": "Hoi! Leuk dat je er bent.",
+    "hallo": "Hallo! Zin in een goed gesprek?",
+    "wat is jouw naam": "Ik ben TJ Chatbot 2.1.",
+    "wie ben jij": "Ik ben een digitale assistent die graag helpt.",
+    "wat kun jij": "Ik kan praten, onthouden, leren en helpen.",
+    "wat is AI": "AI staat voor kunstmatige intelligentie.",
+    "goedemorgen": "Goedemorgen! Hopelijk heb je goed geslapen.",
+    "goedemiddag": "Goedemiddag! Wat staat er op je planning?",
+    "goedenavond": "Goedenavond! Tijd voor een praatje?",
+    "hoe gaat het": "Met mij gaat het goed, dank je!",
+    "yo": "Yo! Klaar om te chatten?",
+    "wat is water": "Water is H2O, essentieel voor leven.",
+    "wat is vuur": "Vuur is een chemische reactie waarbij warmte en licht vrijkomt."
+};
+Object.keys(standaardregels).forEach(vraag => {
+    if (!memory[vraag]) {
+        memory[vraag] = standaardregels[vraag];
+    }
+});
+
 localStorage.setItem('chatbotMemory', JSON.stringify(memory));
 
 function sendMessage() {
@@ -254,3 +278,4 @@ document.getElementById('userInput').addEventListener('keydown', function(e) {
 
 </body>
 </html>
+``
