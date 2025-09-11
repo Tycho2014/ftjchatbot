@@ -1,1 +1,160 @@
-
+{
+  "conversations": [
+    {
+      "vraag": "Wat is de hoofdstad van Nederland?",
+      "antwoord": "De hoofdstad van Nederland is Amsterdam."
+    },
+    {
+      "vraag": "Hoe heet jij?",
+      "antwoord": "Ik ben een chatbot, ik heb geen naam."
+    },
+    {
+      "vraag": "Wat kun jij doen?",
+      "antwoord": "Ik kan vragen beantwoorden, informatie geven en je helpen met simpele problemen."
+    },
+    {
+      "vraag": "Kun je me helpen met mijn huiswerk?",
+      "antwoord": "Ja, ik help graag! Waar gaat je huiswerk over?"
+    },
+    {
+      "vraag": "Wat is 5 + 7?",
+      "antwoord": "5 + 7 is 12."
+    },
+    {
+      "vraag": "Wat is het weer vandaag?",
+      "antwoord": "Sorry, ik kan het actuele weer niet opzoeken. Kijk op een weerwebsite voor de meest recente informatie."
+    },
+    {
+      "vraag": "Wat is de grootste planeet in ons zonnestelsel?",
+      "antwoord": "De grootste planeet in ons zonnestelsel is Jupiter."
+    },
+    {
+      "vraag": "Wie is de koning van Nederland?",
+      "antwoord": "De huidige koning van Nederland is Koning Willem-Alexander."
+    },
+    {
+      "vraag": "Wat is het verschil tussen een appel en een peer?",
+      "antwoord": "Een appel is meestal rond en stevig, een peer is vaak wat zachter en heeft een ovale vorm."
+    },
+    {
+      "vraag": "Hoe werkt fotosynthese?",
+      "antwoord": "Fotosynthese is het proces waarbij planten zonlicht, water en koolstofdioxide omzetten in zuurstof en glucose."
+    },
+    {
+      "vraag": "Hoeveel provincies heeft Nederland?",
+      "antwoord": "Nederland heeft 12 provincies."
+    },
+    {
+      "vraag": "Wat betekent 'HTML'?",
+      "antwoord": "HTML staat voor HyperText Markup Language, het is de opmaaktaal voor webpagina's."
+    },
+    {
+      "vraag": "Wat is het antwoord op het leven, het universum en alles?",
+      "antwoord": "Volgens het boek 'The Hitchhiker's Guide to the Galaxy' is het antwoord 42."
+    },
+    {
+      "vraag": "Hoe programmeer ik een website?",
+      "antwoord": "Je kunt een website programmeren met HTML, CSS en JavaScript. Er zijn veel gratis tutorials online!"
+    },
+    {
+      "vraag": "Wat is kunstmatige intelligentie?",
+      "antwoord": "Kunstmatige intelligentie is technologie die computers in staat stelt taken uit te voeren die normaal menselijke intelligentie vereisen."
+    },
+    {
+      "vraag": "Wat is het snelste landdier?",
+      "antwoord": "Het snelste landdier is de cheeta."
+    },
+    {
+      "vraag": "Hoe laat is het?",
+      "antwoord": "Ik weet niet hoe laat het nu is, maar je kunt op je klok of telefoon kijken!"
+    },
+    {
+      "vraag": "Wat is waterstof?",
+      "antwoord": "Waterstof is een scheikundig element met het symbool H en is het lichtste element in het periodiek systeem."
+    },
+    {
+      "vraag": "Wie heeft de telefoon uitgevonden?",
+      "antwoord": "De telefoon is uitgevonden door Alexander Graham Bell."
+    },
+    {
+      "vraag": "Wat is het grootste land ter wereld?",
+      "antwoord": "Het grootste land ter wereld is Rusland."
+    },
+    {
+      "vraag": "Hoe lang duurt een jaar op Mars?",
+      "antwoord": "Een jaar op Mars duurt ongeveer 687 aardse dagen."
+    },
+    {
+      "vraag": "Wat is de hoofdstad van Frankrijk?",
+      "antwoord": "De hoofdstad van Frankrijk is Parijs."
+    },
+    {
+      "vraag": "Wat is een regenboog?",
+      "antwoord": "Een regenboog ontstaat wanneer zonlicht wordt gebroken door waterdruppels in de lucht, waardoor verschillende kleuren zichtbaar worden."
+    },
+    {
+      "vraag": "Wat is het kleinste botje in het menselijk lichaam?",
+      "antwoord": "Het kleinste botje is de stijgbeugel in het oor."
+    },
+    {
+      "vraag": "Kan een mens onder water ademen?",
+      "antwoord": "Nee, mensen kunnen niet onder water ademen zonder hulpmiddelen zoals een snorkel of duikuitrusting."
+    },
+    {
+      "vraag": "Wat is een chatbot?",
+      "antwoord": "Een chatbot is een computerprogramma dat gesprekken voert met mensen, vaak via tekst."
+    },
+    {
+      "vraag": "Wat is het verschil tussen een laptop en een tablet?",
+      "antwoord": "Een laptop heeft meestal een fysiek toetsenbord en meer rekenkracht, een tablet heeft een touchscreen en is vaak lichter."
+    },
+    {
+      "vraag": "Wat betekent 'wifi'?",
+      "antwoord": "Wifi is een draadloze technologie waarmee apparaten verbinding maken met het internet."
+    },
+    {
+      "vraag": "Hoe maak je pannenkoeken?",
+      "antwoord": "Je mixt bloem, melk en eieren, bakt het beslag in een pan en klaar zijn je pannenkoeken!"
+    },
+    {
+      "vraag": "Wat is het langste dier ter wereld?",
+      "antwoord": "De blauwe vinvis is het langste dier ter wereld."
+    },
+    {
+      "vraag": "Wat is het vierkant van 9?",
+      "antwoord": "Het vierkant van 9 is 81."
+    },
+    {
+      "vraag": "Wat is een algoritme?",
+      "antwoord": "Een algoritme is een reeks stappen om een probleem op te lossen of een taak uit te voeren."
+    },
+    {
+      "vraag": "Wat is het nut van dromen?",
+      "antwoord": "Dromen helpen mogelijk bij het verwerken van emoties en herinneringen, maar wetenschappers weten het nog niet precies."
+    },
+    {
+      "vraag": "Hoe werkt een zonnepaneel?",
+      "antwoord": "Een zonnepaneel zet zonlicht om in elektriciteit door middel van fotovoltaïsche cellen."
+    },
+    {
+      "vraag": "Wat is het grootste eiland ter wereld?",
+      "antwoord": "Groenland is het grootste eiland ter wereld."
+    },
+    {
+      "vraag": "Wie schreef Harry Potter?",
+      "antwoord": "Harry Potter is geschreven door J.K. Rowling."
+    },
+    {
+      "vraag": "Wat is een cirkel?",
+      "antwoord": "Een cirkel is een ronde vorm waarbij alle punten even ver van het middelpunt liggen."
+    },
+    {
+      "vraag": "Hoeveel tanden heeft een volwassen mens?",
+      "antwoord": "Een volwassen mens heeft meestal 32 tanden."
+    },
+    {
+      "vraag": "Wat is een virus?",
+      "antwoord": "Een virus is een minuscuul organisme dat ziektes kan veroorzaken."
+    }
+  ]
+}
