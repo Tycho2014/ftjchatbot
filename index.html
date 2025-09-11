@@ -142,13 +142,23 @@
 </div>
 
 <script>
+const PANTRY_ID = "27f304e8-7ec3-4665-af07-de462c0c8add";
+const PANTRY_URL = `https://getpantry.cloud/apiv1/pantry/${PANTRY_ID}/basket/qna`;
+
+async function leerVraagAntwoord(vraag, antwoord) {
+    let qna = await fetch(PANTRY_URL).then(r => r.json()).catch(() => ({}));
+    qna[vraag] = antwoord;
+    await fetch(PANTRY_URL, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(qna)
+    });
+}
+
 async function haalAntwoordOp(vraag) {
-    const PANTRY_ID = "27f304e8-7ec3-4665-af07-de462c0c8add";
-    const PANTRY_URL = `https://getpantry.cloud/apiv1/pantry/${PANTRY_ID}/basket/qna`;
     let qna = await fetch(PANTRY_URL).then(r => r.json()).catch(() => ({}));
     return qna[vraag] || "Niet geleerd!";
 }
-    
 
 let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
 let waitingForAnswer = null;
@@ -197,6 +207,7 @@ function sendMessage() {
     if (waitingForAnswer) {
         memory[waitingForAnswer] = text;
         localStorage.setItem('chatbotMemory', JSON.stringify(memory));
+        leerVraagAntwoord(waitingForAnswer, text); // <-- Opslaan in Pantry!
         typeMessage("Bedankt! Zo kunnen we de TJ AI verder trainen.");
         waitingForAnswer = null;
         return;
@@ -211,7 +222,6 @@ function addMessage(text, sender) {
     msgContainer.textContent = text;
     document.getElementById('messages').appendChild(msgContainer);
     document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
-
 }
 
 function botReply(userText) {
@@ -220,19 +230,28 @@ function botReply(userText) {
 
     if (memory[lower]) {
         reply = memory[lower];
-    } else if (lower.includes("hallo")) {
-        reply = "Hallo! Hoe kan ik je helpen?";
-    } else if (lower.includes("hoe gaat het")) {
-        reply = "Met mij gaat het goed, dank je!";
-    } else if (lower.includes("wat is je naam")) {
-        reply = "Ik ben TJ Chatbot 2.1.";
-    }
-
-    if (reply) {
+        typeMessage(reply);
+    } else if (
+        lower.includes("hallo") ||
+        lower.includes("hoe gaat het") ||
+        lower.includes("wat is je naam")
+    ) {
+        if (lower.includes("hallo")) reply = "Hallo! Hoe kan ik je helpen?";
+        if (lower.includes("hoe gaat het")) reply = "Met mij gaat het goed, dank je!";
+        if (lower.includes("wat is je naam")) reply = "Ik ben TJ Chatbot 2.1.";
         typeMessage(reply);
     } else {
-        typeMessage("Dat weet ik nog niet. Wat moet de AI zeggen?");
-        waitingForAnswer = lower;
+        // Eerst Pantry checken!
+        haalAntwoordOp(lower).then(pantryAntwoord => {
+            if (pantryAntwoord !== "Niet geleerd!") {
+                typeMessage(pantryAntwoord);
+                memory[lower] = pantryAntwoord; // Optioneel: syncen met localStorage
+                localStorage.setItem('chatbotMemory', JSON.stringify(memory));
+            } else {
+                typeMessage("Dat weet ik nog niet. Wat moet de AI zeggen?");
+                waitingForAnswer = lower;
+            }
+        });
     }
 }
 
@@ -287,4 +306,3 @@ document.getElementById('userInput').addEventListener('keydown', function(e) {
 
 </body>
 </html>
-``
