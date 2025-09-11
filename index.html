@@ -62,6 +62,21 @@
         cursor: pointer;
     }
 
+    .search-area {
+        display: flex;
+        padding: 10px;
+        background: #fff;
+        border-bottom: 1px solid #ccc;
+    }
+
+    .search-area input {
+        flex: 1;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 20px;
+        outline: none;
+    }
+
     .input-area {
         display: flex;
         padding: 10px;
@@ -100,6 +115,10 @@
   </a>
 </div>
 
+<div class="search-area">
+    <input type="text" id="searchInput" placeholder="Zoek in AI-geheugen..." oninput="searchMemory()">
+</div>
+
 <div class="messages" id="messages"></div>
 
 <div class="input-area">
@@ -109,7 +128,16 @@
 
 <script>
 let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
-let waitingForAnswer = null; // onthoudt of we een leerantwoord verwachten
+let waitingForAnswer = null;
+
+// Vul standaard 1000 vraag-antwoordparen in als ze nog niet bestaan
+for (let i = 1; i <= 1000; i++) {
+    const vraag = `vraag ${i}`;
+    if (!memory[vraag]) {
+        memory[vraag] = `Dit is het antwoord op vraag ${i}`;
+    }
+}
+localStorage.setItem('chatbotMemory', JSON.stringify(memory));
 
 function sendMessage() {
     const input = document.getElementById('userInput');
@@ -119,7 +147,6 @@ function sendMessage() {
     addMessage(text, 'user');
     input.value = '';
 
-    // Als we wachten op een antwoord om te leren
     if (waitingForAnswer) {
         memory[waitingForAnswer] = text;
         localStorage.setItem('chatbotMemory', JSON.stringify(memory));
@@ -157,7 +184,7 @@ function botReply(userText) {
         typeMessage(reply);
     } else {
         typeMessage("Dat weet ik nog niet. Wat moet de AI zeggen?");
-        waitingForAnswer = lower; // onthoud de vraag
+        waitingForAnswer = lower;
     }
 }
 
@@ -175,6 +202,24 @@ function typeMessage(text) {
         }
     }
     typing();
+}
+
+// Zoekfunctie
+function searchMemory() {
+    const term = document.getElementById('searchInput').value.toLowerCase();
+    const messagesDiv = document.getElementById('messages');
+    messagesDiv.innerHTML = '';
+
+    if (term.length === 0) return;
+
+    const results = Object.keys(memory).filter(q => q.includes(term));
+    if (results.length === 0) {
+        addMessage("Geen resultaten gevonden.", 'bot');
+    } else {
+        results.forEach(q => {
+            addMessage(`${q} → ${memory[q]}`, 'bot');
+        });
+    }
 }
 
 // Enter = verzenden
