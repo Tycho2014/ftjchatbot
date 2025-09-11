@@ -1,235 +1,26 @@
-<!DOCTYPE html>
-<html lang="nl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TJ Chatbot 2.1</title>
-<style>
-    body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        background: #e5ddd5;
-    }
-
-    .messages {
-        flex: 1;
-        padding: 15px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .message {
-        max-width: 70%;
-        padding: 10px;
-        margin-bottom: 10px;
-        border-radius: 8px;
-        animation: fadeIn 0.3s ease-in-out;
-    }
-
-    .user {
-        align-self: flex-end;
-        background: #dcf8c6;
-    }
-
-    .bot {
-        align-self: flex-start;
-        background: #fff;
-    }
-
-    @keyframes fadeIn {
-        from {opacity: 0; transform: translateY(10px);}
-        to {opacity: 1; transform: translateY(0);}
-    }
-
-    .top-buttons {
-        text-align: center;
-        padding: 10px;
-        background: #fff;
-        border-bottom: 1px solid #ccc;
-    }
-
-    .top-buttons button {
-        padding: 10px 20px;
-        font-size: 16px;
-        background-color: #007bff;
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-
-    .search-area {
-        display: flex;
-        padding: 10px;
-        background: #fff;
-        border-bottom: 1px solid #ccc;
-    }
-
-    .search-area input {
-        flex: 1;
-        padding: 8px;
-        border: 1px solid #ccc;
-        border-radius: 20px;
-        outline: none;
-    }
-
-    .input-area {
-        display: flex;
-        padding: 10px;
-        background: #fff;
-        border-top: 1px solid #ccc;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .input-area input {
-        flex: 1;
-        padding: 12px;
-        border: 1px solid #ccc;
-        border-radius: 25px;
-        outline: none;
-        font-size: 16px;
-    }
-
-    .input-area button {
-        margin-left: 10px;
-        padding: 12px 18px;
-        border: none;
-        border-radius: 50%;
-        background: #007bff;
-        color: white;
-        cursor: pointer;
-        font-size: 18px;
-    }
-</style>
-</head>
-<body>
-
-<div class="top-buttons">
-  <a href="bulk.html">
-    <button>📦 Bulk Leer</button>
-  </a>
-</div>
-
-<div class="search-area">
-    <input type="text" id="searchInput" placeholder="Zoek in AI-geheugen..." oninput="searchMemory()">
-</div>
-
-<div class="messages" id="messages"></div>
-
-<div class="input-area">
-    <input type="text" id="userInput" placeholder="Typ je bericht...">
-    <button onclick="sendMessage()">➤</button>
-</div>
-
+<!-- Alleen het zoekMemory-gedeelte aangepast -->
 <script>
-let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
-let waitingForAnswer = null;
-
-// Vul standaard 1000 vraag-antwoordparen in als ze nog niet bestaan
-for (let i = 1; i <= 1000; i++) {
-    const vraag = `vraag ${i}`;
-    if (!memory[vraag]) {
-        memory[vraag] = `Dit is het antwoord op vraag ${i}`;
-    }
-}
-localStorage.setItem('chatbotMemory', JSON.stringify(memory));
-
-function sendMessage() {
-    const input = document.getElementById('userInput');
-    const text = input.value.trim();
-    if (!text) return;
-
-    addMessage(text, 'user');
-    input.value = '';
-
-    if (waitingForAnswer) {
-        memory[waitingForAnswer] = text;
-        localStorage.setItem('chatbotMemory', JSON.stringify(memory));
-        typeMessage("Bedankt! Ik heb dat geleerd.");
-        waitingForAnswer = null;
-        return;
-    }
-
-    setTimeout(() => botReply(text), 500);
-}
-
-function addMessage(text, sender) {
-    const msgContainer = document.createElement('div');
-    msgContainer.classList.add('message', sender);
-    msgContainer.textContent = text;
-    document.getElementById('messages').appendChild(msgContainer);
-    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
-}
-
-function botReply(userText) {
-    let reply = null;
-    const lower = userText.toLowerCase();
-
-    if (memory[lower]) {
-        reply = memory[lower];
-    } else if (lower.includes("hallo")) {
-        reply = "Hallo! Hoe kan ik je helpen?";
-    } else if (lower.includes("hoe gaat het")) {
-        reply = "Met mij gaat het goed, dank je!";
-    } else if (lower.includes("wat is je naam")) {
-        reply = "Ik ben TJ Chatbot 2.1.";
-    }
-
-    if (reply) {
-        typeMessage(reply);
-    } else {
-        typeMessage("Dat weet ik nog niet. Wat moet de AI zeggen?");
-        waitingForAnswer = lower;
-    }
-}
-
-function typeMessage(text) {
-    const msgContainer = document.createElement('div');
-    msgContainer.classList.add('message', 'bot');
-    document.getElementById('messages').appendChild(msgContainer);
-
-    let i = 0;
-    function typing() {
-        if (i < text.length) {
-            msgContainer.textContent += text.charAt(i);
-            i++;
-            setTimeout(typing, 40);
-        }
-    }
-    typing();
-}
-
-// Zoekfunctie
 function searchMemory() {
     const term = document.getElementById('searchInput').value.toLowerCase();
-    const messagesDiv = document.getElementById('messages');
-    messagesDiv.innerHTML = '';
+    const resultsDiv = document.getElementById('searchResults');
+    resultsDiv.innerHTML = '';
 
     if (term.length === 0) return;
 
     const results = Object.keys(memory).filter(q => q.includes(term));
     if (results.length === 0) {
-        addMessage("Geen resultaten gevonden.", 'bot');
+        resultsDiv.innerHTML = '<div>Geen resultaten gevonden.</div>';
     } else {
         results.forEach(q => {
-            addMessage(`${q} → ${memory[q]}`, 'bot');
+            const item = document.createElement('div');
+            item.textContent = `${q} → ${memory[q]}`;
+            item.style.cursor = 'pointer';
+            item.onclick = () => {
+                document.getElementById('userInput').value = q;
+                document.getElementById('userInput').focus();
+            };
+            resultsDiv.appendChild(item);
         });
     }
 }
-
-// Enter = verzenden
-document.getElementById('userInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        sendMessage();
-    }
-});
 </script>
-
-</body>
-</html>
