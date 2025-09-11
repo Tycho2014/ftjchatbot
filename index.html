@@ -142,7 +142,40 @@
 </div>
 
 <script>
-let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
+    const fetch = require('node-fetch');
+
+// Zet je API-key veilig in een omgevingvariabele!
+const OPENAI_API_KEY = "0c8f8ba5f237466084873422c2415350";
+
+async function menselijkAntwoord(vraag) {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+            "Authorization": `Bearer ${OPENAI_API_KEY}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            model: "gpt-3.5-turbo", // Of "gpt-4" als je die hebt
+            messages: [
+                {role: "system", content: "Je bent een vriendelijke en empathische chatbot die als een mens antwoordt."},
+                {role: "user", content: vraag}
+            ],
+            max_tokens: 150,
+            temperature: 0.9 // Creatiever en menselijker
+        })
+    });
+
+    const data = await response.json();
+    return data.choices[0].message.content;
+}
+
+// Test
+menselijkAntwoord("Hoe gaat het vandaag met je?")
+    .then(antwoord => console.log(antwoord))
+    .catch(err => console.error(err));
+    
+    
+    let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
 let waitingForAnswer = null;
 
 // 1️⃣ Voeg 1000 standaardvragen toe
