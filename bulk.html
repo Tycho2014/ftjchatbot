@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bulk Leer AI</title>
+  <title>Leer AI</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -47,6 +47,10 @@
       cursor: pointer;
     }
 
+    .danger {
+      background-color: #dc3545;
+    }
+
     .status {
       margin-top: 15px;
       font-style: italic;
@@ -66,10 +70,6 @@
     .list div {
       padding: 4px 0;
       border-bottom: 1px solid #ddd;
-    }
-
-    .danger {
-      background-color: red;
     }
   </style>
 </head>
@@ -117,7 +117,7 @@
   }
 
   function clearMemory() {
-    if (confirm("Weet je zeker dat je ALLES wilt wissen?")) {
+    if (confirm("Weet je zeker dat je het hele geheugen wilt wissen?")) {
       localStorage.removeItem('chatbotMemory');
       memory = {};
       document.getElementById('statusMsg').textContent = "Geheugen is gewist!";
@@ -135,7 +135,6 @@
     });
   }
 
-  // Toon bestaande kennis bij laden
   document.addEventListener("DOMContentLoaded", showLearned);
 </script>
 
