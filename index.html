@@ -142,6 +142,14 @@
 </div>
 
 <script>
+async function haalAntwoordOp(vraag) {
+    const PANTRY_ID = "27f304e8-7ec3-4665-af07-de462c0c8add";
+    const PANTRY_URL = `https://getpantry.cloud/apiv1/pantry/${PANTRY_ID}/basket/qna`;
+    let qna = await fetch(PANTRY_URL).then(r => r.json()).catch(() => ({}));
+    return qna[vraag] || "Niet geleerd!";
+}
+    
+
 let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
 let waitingForAnswer = null;
 
