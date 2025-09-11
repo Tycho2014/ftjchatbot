@@ -67,6 +67,10 @@
       padding: 4px 0;
       border-bottom: 1px solid #ddd;
     }
+
+    .danger {
+      background-color: red;
+    }
   </style>
 </head>
 <body>
@@ -83,7 +87,8 @@
   <h1>Bulk Leer de AI</h1>
   <p>Voer regels in zoals: <code>wat is water = Water is H2O.</code></p>
   <textarea id="bulkInput" placeholder="vraag = antwoord"></textarea>
-  <button onclick="bulkLearn()">Opslaan in geheugen</button>
+  <button onclick="bulkLearn()">💾 Opslaan in geheugen</button>
+  <button class="danger" onclick="clearMemory()">🗑 Wis Geheugen</button>
   <p class="status" id="statusMsg"></p>
 
   <h2>📜 Geleerde kennis</h2>
@@ -109,6 +114,15 @@
     localStorage.setItem('chatbotMemory', JSON.stringify(memory));
     document.getElementById('statusMsg').textContent = `AI heeft ${count} dingen geleerd!`;
     showLearned();
+  }
+
+  function clearMemory() {
+    if (confirm("Weet je zeker dat je ALLES wilt wissen?")) {
+      localStorage.removeItem('chatbotMemory');
+      memory = {};
+      document.getElementById('statusMsg').textContent = "Geheugen is gewist!";
+      document.getElementById('learnedList').innerHTML = '';
+    }
   }
 
   function showLearned() {
