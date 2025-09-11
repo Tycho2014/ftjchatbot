@@ -96,36 +96,63 @@
 </div>
 
 <script>
-  let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
+  const PANTRY_ID = "27f304e8-7ec3-4665-af07-de462c0c8add";
+  const PANTRY_URL = `https://getpantry.cloud/apiv1/pantry/${PANTRY_ID}/basket/qna`;
 
-  function bulkLearn() {
+  let memory = {};
+
+  async function bulkLearn() {
     const input = document.getElementById('bulkInput').value.trim();
     const lines = input.split('\n');
     let count = 0;
 
+    // Eerst de huidige Pantry ophalen
+    let pantryMemory = await fetch(PANTRY_URL).then(r => r.json()).catch(() => ({}));
+    if (!pantryMemory) pantryMemory = {};
+
     lines.forEach(line => {
       const [q, a] = line.split('=');
       if (q && a) {
-        memory[q.trim().toLowerCase()] = a.trim();
+        const vraag = q.trim().toLowerCase();
+        const antwoord = a.trim();
+        memory[vraag] = antwoord;
+        pantryMemory[vraag] = antwoord;
         count++;
       }
     });
 
+    // Sla lokaal op
     localStorage.setItem('chatbotMemory', JSON.stringify(memory));
+    // Sla in Pantry op
+    await fetch(PANTRY_URL, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(pantryMemory)
+    });
+
     document.getElementById('statusMsg').textContent = `AI heeft ${count} dingen geleerd!`;
     showLearned();
   }
 
-  function clearMemory() {
+  async function clearMemory() {
     if (confirm("Weet je zeker dat je het hele geheugen wilt wissen?")) {
       localStorage.removeItem('chatbotMemory');
       memory = {};
+      // Maak Pantry leeg
+      await fetch(PANTRY_URL, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({})
+      });
       document.getElementById('statusMsg').textContent = "Geheugen is gewist!";
       document.getElementById('learnedList').innerHTML = '';
     }
   }
 
-  function showLearned() {
+  async function showLearned() {
+    // Haal Pantry op en toon in lijst
+    let pantryMemory = await fetch(PANTRY_URL).then(r => r.json()).catch(() => ({}));
+    memory = pantryMemory || {};
     const listDiv = document.getElementById('learnedList');
     listDiv.innerHTML = '';
     Object.keys(memory).forEach(key => {
