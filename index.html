@@ -153,7 +153,7 @@ for (let i = 1; i <= 1000; i++) {
     }
 }
 
-// 2️⃣ Voeg standaardregels toe (begroetingen, AI-info, weetjes)
+// 2️⃣ Voeg standaardregels toe (begroetingen, AI-info, enz.)
 const standaardregels = {
     "hey": "Hallo! Ik ben een AI en ik ben hier om je te helpen.",
     "hoi": "Hoi! Leuk dat je er bent.",
@@ -162,7 +162,13 @@ const standaardregels = {
     "wie ben jij": "Ik ben een digitale assistent die graag helpt.",
     "wat kun jij": "Ik kan praten, onthouden, leren en helpen.",
     "wat is AI": "AI staat voor kunstmatige intelligentie.",
-
+    "goedemorgen": "Goedemorgen! Hopelijk heb je goed geslapen.",
+    "goedemiddag": "Goedemiddag! Wat staat er op je planning?",
+    "goedenavond": "Goedenavond! Tijd voor een praatje?",
+    "hoe gaat het": "Met mij gaat het goed, dank je!",
+    "yo": "Yo! Klaar om te chatten?",
+    "wat is water": "Water is H2O, essentieel voor leven.",
+    "wat is vuur": "Vuur is een chemische reactie waarbij warmte en licht vrijkomt."
 };
 Object.keys(standaardregels).forEach(vraag => {
     if (!memory[vraag]) {
