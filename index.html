@@ -203,16 +203,7 @@ function addMessage(text, sender) {
     msgContainer.textContent = text;
     document.getElementById('messages').appendChild(msgContainer);
     document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
-}
-// Speciale trigger: "zing een lied"
-if (userText.toLowerCase().includes("zing een lied")) {
-    typeMessage("🎵 Oké, ik zing voor je! 🎵");
-    const audio = document.createElement('audio');
-    audio.src = 'verlangen.mp4';
-    audio.autoplay = true;
-    audio.controls = true; // optioneel: laat bedieningsknoppen zien
-    document.getElementById('messages').appendChild(audio);
-    return;
+
 }
 
 function botReply(userText) {
