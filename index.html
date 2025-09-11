@@ -189,7 +189,7 @@ function sendMessage() {
     if (waitingForAnswer) {
         memory[waitingForAnswer] = text;
         localStorage.setItem('chatbotMemory', JSON.stringify(memory));
-        typeMessage("Bedankt! Ik heb dat geleerd.");
+        typeMessage("Heel fijn dat je helpt met onze ai trainen");
         waitingForAnswer = null;
         return;
     }
