@@ -142,13 +142,32 @@
 </div>
 
 <script>
-    const fetch = require('node-fetch');
+       // Voorbeeld: Simpele nieuws-chatbot met NewsAPI.org
+// Vervang endpoint en parameters indien je een andere gratis nieuws-API gebruikt!
 
-// Zet je API-key veilig in een omgevingvariabele!
-const OPENAI_API_KEY = "0c8f8ba5f237466084873422c2415350";
+const NEWS_API_KEY = "0c8f8ba5f237466084873422c2415350"; // Zet deze in een .env of backend!
+const NEWS_API_URL = `https://newsapi.org/v2/top-headlines?country=nl&apiKey=${NEWS_API_KEY}`;
 
-async function menselijkAntwoord(vraag) {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+// Menselijk antwoord genereren (simpel)
+function menselijkAntwoord(artikel) {
+    // Pas dit aan voor meer persoonlijkheid!
+    return `Hier is een interessant nieuwsbericht: "${artikel.title}". Het gaat over ${artikel.description || "een actueel onderwerp"}. Wil je meer weten?`;
+}
+
+// Nieuws ophalen
+async function haalNieuwsOp() {
+    const response = await fetch(NEWS_API_URL);
+    const data = await response.json();
+    if (!data.articles || data.articles.length === 0) {
+        return "Sorry, ik kon geen nieuws vinden.";
+    }
+    // Kies het eerste artikel, of random
+    const artikel = data.articles[0];
+    return menselijkAntwoord(artikel);
+}
+
+// Test: print een menselijk nieuwsantwoord
+haalNieuwsOp().then(antwoord => console.log(antwoord));
         method: "POST",
         headers: {
             "Authorization": `Bearer ${OPENAI_API_KEY}`,
