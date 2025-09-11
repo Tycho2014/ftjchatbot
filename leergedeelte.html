@@ -60,6 +60,18 @@
 </div>
 
 <script>
+  async function leerVraagAntwoord(vraag, antwoord) {
+    const PANTRY_ID = "27f304e8-7ec3-4665-af07-de462c0c8add";
+    const PANTRY_URL = `https://getpantry.cloud/apiv1/pantry/${PANTRY_ID}/basket/qna`;
+    let bestaandQna = await fetch(PANTRY_URL).then(r => r.json()).catch(() => ({}));
+    bestaandQna[vraag] = antwoord;
+    await fetch(PANTRY_URL, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bestaandQna)
+    });
+}
+  
   let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
 
   function saveLearning() {
