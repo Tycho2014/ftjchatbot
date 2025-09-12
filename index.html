@@ -141,8 +141,9 @@
     <button onclick="sendMessage()">➤</button>
 </div>
 
-<!-- Voeg audio-element toe -->
+<!-- Audio-elementen voor liedjes -->
 <audio id="songPlayer" src="Verlangen.mp3"></audio>
+<audio id="koePlayer" src="boe.mp3"></audio>
 
 <script>
 const PANTRY_ID = "27f304e8-7ec3-4665-af07-de462c0c8add";
@@ -202,7 +203,7 @@ function sendMessage() {
     if (waitingForAnswer) {
         memory[waitingForAnswer] = text;
         localStorage.setItem('chatbotMemory', JSON.stringify(memory));
-        leerVraagAntwoord(waitingForAnswer, text); // <-- Opslaan in Pantry!
+        leerVraagAntwoord(waitingForAnswer, text);
         typeMessage("Bedankt! Zo kunnen we de TJ AI verder trainen.");
         waitingForAnswer = null;
         return;
@@ -223,13 +224,21 @@ function botReply(userText) {
     let reply = null;
     const lower = userText.toLowerCase();
 
-    // Audio trigger
+    // Audio triggers
     if (lower === "zing een liedje") {
         reply = "Hier komt een liedje!";
         typeMessage(reply);
         const audio = document.getElementById('songPlayer');
-        audio.currentTime = 0; // Start vanaf begin
+        audio.currentTime = 0;
         audio.play();
+        return;
+    }
+    if (lower === "zing een koe lied") {
+        reply = "De koe zingt: boe!";
+        typeMessage(reply);
+        const koeAudio = document.getElementById('koePlayer');
+        koeAudio.currentTime = 0;
+        koeAudio.play();
         return;
     }
 
@@ -246,11 +255,10 @@ function botReply(userText) {
         if (lower.includes("wat is je naam")) reply = "Ik ben TJ Chatbot 2.1.";
         typeMessage(reply);
     } else {
-        // Eerst Pantry checken!
         haalAntwoordOp(lower).then(pantryAntwoord => {
             if (pantryAntwoord !== "Niet geleerd!") {
                 typeMessage(pantryAntwoord);
-                memory[lower] = pantryAntwoord; // Optioneel: syncen met localStorage
+                memory[lower] = pantryAntwoord;
                 localStorage.setItem('chatbotMemory', JSON.stringify(memory));
             } else {
                 typeMessage("Dat weet ik nog niet. Wat moet de AI zeggen?");
@@ -276,7 +284,6 @@ function typeMessage(text) {
     typing();
 }
 
-// Zoekfunctie met klikbare resultaten
 function searchMemory() {
     const term = document.getElementById('searchInput').value.toLowerCase();
     const resultsDiv = document.getElementById('searchResults');
@@ -300,7 +307,6 @@ function searchMemory() {
     }
 }
 
-// Enter = verzenden
 document.getElementById('userInput').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
         e.preventDefault();
