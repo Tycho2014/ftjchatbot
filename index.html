@@ -145,9 +145,20 @@
 <audio id="songPlayer" src="Verlangen.mp3"></audio>
 <audio id="koePlayer" src="boe.mp3"></audio>
 
+<!-- ... alles tot aan <script> blijft hetzelfde ... -->
+
 <script>
 const PANTRY_ID = "27f304e8-7ec3-4665-af07-de462c0c8add";
 const PANTRY_URL = `https://getpantry.cloud/apiv1/pantry/${PANTRY_ID}/basket/qna`;
+
+// VOORLEZEN TOEGEVOEGD
+function speak(text) {
+    if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'nl-NL'; // Nederlandse stem
+        window.speechSynthesis.speak(utterance);
+    }
+}
 
 async function leerVraagAntwoord(vraag, antwoord) {
     let qna = await fetch(PANTRY_URL).then(r => r.json()).catch(() => ({}));
@@ -228,6 +239,7 @@ function botReply(userText) {
     if (lower === "zing een liedje") {
         reply = "Hier komt een liedje!";
         typeMessage(reply);
+        speak(reply); // VOORLEZEN TOEGEVOEGD
         const audio = document.getElementById('songPlayer');
         audio.currentTime = 0;
         audio.play();
@@ -236,6 +248,7 @@ function botReply(userText) {
     if (lower === "zing een koe lied") {
         reply = "De koe zingt: boe!";
         typeMessage(reply);
+        speak(reply); // VOORLEZEN TOEGEVOEGD
         const koeAudio = document.getElementById('koePlayer');
         koeAudio.currentTime = 0;
         koeAudio.play();
@@ -245,6 +258,7 @@ function botReply(userText) {
     if (memory[lower]) {
         reply = memory[lower];
         typeMessage(reply);
+        speak(reply); // VOORLEZEN TOEGEVOEGD
     } else if (
         lower.includes("hallo") ||
         lower.includes("hoe gaat het") ||
@@ -254,14 +268,17 @@ function botReply(userText) {
         if (lower.includes("hoe gaat het")) reply = "Met mij gaat het goed, dank je!";
         if (lower.includes("wat is je naam")) reply = "Ik ben TJ Chatbot 2.1.";
         typeMessage(reply);
+        speak(reply); // VOORLEZEN TOEGEVOEGD
     } else {
         haalAntwoordOp(lower).then(pantryAntwoord => {
             if (pantryAntwoord !== "Niet geleerd!") {
                 typeMessage(pantryAntwoord);
+                speak(pantryAntwoord); // VOORLEZEN TOEGEVOEGD
                 memory[lower] = pantryAntwoord;
                 localStorage.setItem('chatbotMemory', JSON.stringify(memory));
             } else {
                 typeMessage("Dat weet ik nog niet. Wat moet de AI zeggen?");
+                speak("Dat weet ik nog niet. Wat moet de AI zeggen?"); // VOORLEZEN TOEGEVOEGD
                 waitingForAnswer = lower;
             }
         });
@@ -282,6 +299,7 @@ function typeMessage(text) {
         }
     }
     typing();
+    speak(text); // VOORLEZEN TOEGEVOEGD
 }
 
 function searchMemory() {
