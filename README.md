@@ -1,5 +1,5 @@
-# ftjchatbot
+# TJ Chatbot
 This is a beta version of the project ai from ai
-there is a limit on 10 mb on learning
+The link is https://tycho2014.github.io/ftjchatbot/
 
 
