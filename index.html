@@ -141,6 +141,9 @@
     <button onclick="sendMessage()">➤</button>
 </div>
 
+<!-- Voeg audio-element toe -->
+<audio id="songPlayer" src="Verlangen.mp3"></audio>
+
 <script>
 const PANTRY_ID = "27f304e8-7ec3-4665-af07-de462c0c8add";
 const PANTRY_URL = `https://getpantry.cloud/apiv1/pantry/${PANTRY_ID}/basket/qna`;
@@ -163,10 +166,7 @@ async function haalAntwoordOp(vraag) {
 let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
 let waitingForAnswer = null;
 
-    }
-}
-
-// 2️⃣ Voeg standaardregels toe (begroetingen, AI-info, enz.)
+// Voeg standaardregels toe (begroetingen, AI-info, enz.)
 const standaardregels = {
     "hey": "Hallo! Ik ben een AI en ik ben hier om je te helpen.",
     "hoi": "Hoi! Leuk dat je er bent.",
@@ -222,6 +222,16 @@ function addMessage(text, sender) {
 function botReply(userText) {
     let reply = null;
     const lower = userText.toLowerCase();
+
+    // Audio trigger
+    if (lower === "zing een liedje") {
+        reply = "Hier komt een liedje!";
+        typeMessage(reply);
+        const audio = document.getElementById('songPlayer');
+        audio.currentTime = 0; // Start vanaf begin
+        audio.play();
+        return;
+    }
 
     if (memory[lower]) {
         reply = memory[lower];
