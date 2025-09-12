@@ -126,7 +126,8 @@ body {
 <!-- Audio-elementen voor liedjes -->
 <audio id="songPlayer" src="Verlangen.mp3"></audio>
 <audio id="koePlayer" src="boe.mp3"></audio>
-
+<audio id="SchoolHaat" src="Wij Haten School.mp3"></audio>
+    
 <script>
 const PANTRY_ID = "27f304e8-7ec3-4665-af07-de462c0c8add";
 const PANTRY_URL = `https://getpantry.cloud/apiv1/pantry/${PANTRY_ID}/basket/qna`;
@@ -231,6 +232,15 @@ function botReply(userText) {
         const koeAudio = document.getElementById('koePlayer');
         koeAudio.currentTime = 0;
         koeAudio.play();
+        return;
+    }
+    if (lower === "ik haat school") {
+        reply = "Dan is dit wat voor jou!";
+        typeMessage(reply);
+        speak(reply);
+        const audio = document.getElementById('SchoolHaat');
+        audio.currentTime = 0;
+        audio.play();
         return;
     }
 
