@@ -163,11 +163,6 @@ async function haalAntwoordOp(vraag) {
 let memory = JSON.parse(localStorage.getItem('chatbotMemory')) || {};
 let waitingForAnswer = null;
 
-// 1️⃣ Voeg 1000 standaardvragen toe
-for (let i = 1; i <= 1000; i++) {
-    const vraag = `vraag ${i}`;
-    if (!memory[vraag]) {
-        memory[vraag] = `Dit is het antwoord op vraag ${i}`;
     }
 }
 
