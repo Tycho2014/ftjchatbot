@@ -124,9 +124,9 @@ body {
 </div>
 
 <!-- Audio-elementen voor liedjes -->
-<audio id="songPlayer" src="Verlangen.mp3"></audio>
+<audio id="KortRaar" src="Verlangen1.mp3"></audio>
 <audio id="koePlayer" src="boe.mp3"></audio>
-<audio id="SchoolHaat" src="Wij Haten School.mp3"></audio>
+<audio id="LangRaar" src="Verlangen2.mp3"></audio>
     
 <script>
 const PANTRY_ID = "27f304e8-7ec3-4665-af07-de462c0c8add";
@@ -217,16 +217,16 @@ function botReply(userText) {
 
     // Audio triggers
     if (lower === "zing een gek lied") {
-        reply = "Hier .....!";
+        reply = "Hier .....! Zeg ´Zing een lang gek lied´ voor een langere versie";
         typeMessage(reply);
         speak(reply);
-        const audio = document.getElementById('songPlayer');
+        const audio = document.getElementById('KortRaar');
         audio.currentTime = 0;
         audio.play();
         return;
     }
     if (lower === "zing een koe lied") {
-        reply = "De koe zingt: boe!";
+        reply = "Luister goed! Hoor wat ik wil!";
         typeMessage(reply);
         speak(reply);
         const koeAudio = document.getElementById('koePlayer');
@@ -234,11 +234,11 @@ function botReply(userText) {
         koeAudio.play();
         return;
     }
-    if (lower === "ik haat school") {
-        reply = "Dan is dit wat voor jou!";
+    if (lower === "Zing een lang gek lied") {
+        reply = "Niet schrikken";
         typeMessage(reply);
         speak(reply);
-        const audio = document.getElementById('SchoolHaat');
+        const audio = document.getElementById('LangRaar');
         audio.currentTime = 0;
         audio.play();
         return;
